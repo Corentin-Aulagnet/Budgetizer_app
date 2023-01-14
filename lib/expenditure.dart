@@ -1,6 +1,6 @@
 class Expenditure {
   String title;
   double value;
-
-  Expenditure({required this.title, required this.value});
+  DateTime date;
+  Expenditure({required this.title, required this.value, required this.date});
 }
