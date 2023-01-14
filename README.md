@@ -1,4 +1,4 @@
-# shareparts
+# Budgetizer
 
 A project to develop an open source project to share expenses during a trip with friends
 

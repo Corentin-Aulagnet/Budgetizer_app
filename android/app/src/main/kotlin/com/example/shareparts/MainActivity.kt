@@ -1,4 +1,4 @@
-package com.example.shareparts
+package com.example.budgetizer
 
 import io.flutter.embedding.android.FlutterActivity
 
