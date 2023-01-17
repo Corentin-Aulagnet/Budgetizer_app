@@ -129,18 +129,20 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         child: Container(height: 50.0),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => setState(() {
-          bool added = AddExpenditureToDatabase();
-          if (added) Navigator.maybePop(context);
-          //Define what to do when pressed
-        }),
-        child: const Icon(Icons.save),
-      ),
+          onPressed: () async {
+            bool added = await AddExpenditureToDatabase();
+            if (added) {
+              setState(() {
+                Navigator.of(context).pop();
+              });
+            }
+          },
+          child: const Icon(Icons.save)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  bool AddExpenditureToDatabase() {
+  Future<bool> AddExpenditureToDatabase() async {
     //Validates that all mandatory fields are filled
     if (title_text == '' || value == 0.0 || date == DateTime(1800, 1, 1)) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -148,12 +150,12 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
               'All fields must be filled ${title_text == '' ? 'Title' : ''} ${value == 0.0 ? 'Amount' : ''}')));
       return false;
     } else {
-      DatabaseHandler.InsertData({
+      await DatabaseHandler.InsertData({
         'title': title_text,
         'value': value,
         'date': date.toIso8601String()
       });
-      return true;
     }
+    return true;
   }
 }

@@ -62,7 +62,7 @@ class DatabaseHandler {
     return data;
   }
 
-  static void InsertData(Map<String, dynamic> mapToInsert) async {
+  static Future<void> InsertData(Map<String, dynamic> mapToInsert) async {
     // Open the database
     Database db = await openDatabase(
         join(await getDatabasesPath(), databaseName),
