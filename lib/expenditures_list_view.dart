@@ -4,8 +4,8 @@ import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:intl/intl.dart';
 
-class ExpenditureTab extends StatelessWidget {
-  ExpenditureTab({super.key});
+class ExpendituresListView extends StatelessWidget {
+  ExpendituresListView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,13 +14,12 @@ class ExpenditureTab extends StatelessWidget {
 }
 
 class _ExpendituresState extends State<Expenditures> {
-  final _expenditures = <Expenditure>[]; //Growable list of Expenditures
-  final _biggerFont = const TextStyle(fontSize: 18);
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
         onRefresh: refreshView,
-        child: FutureBuilder<List<Map<String, dynamic>>>(
+        child: Scaffold(
+            body: FutureBuilder<List<Map<String, dynamic>>>(
           future: DatabaseHandler.fetchData(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -57,7 +56,7 @@ class _ExpendituresState extends State<Expenditures> {
             }
             return const Center(child: CircularProgressIndicator());
           },
-        ));
+        )));
   }
 
   Future<void> refreshView() => Future(() {

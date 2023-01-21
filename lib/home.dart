@@ -1,14 +1,16 @@
+import 'package:budgetizer/statistics_view.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/options_view.dart';
 import 'expenditures_list_view.dart';
 import 'add_expenditure_view.dart';
+import 'package:budgetizer/pie_chart.dart';
 
 class Home extends StatelessWidget {
   Home({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return HomeWidget();
+    return const HomeWidget();
   }
 }
 
@@ -27,41 +29,31 @@ class _HomeWidgetState extends State<HomeWidget> {
         builder: (context) => DefaultTabController(
             length: 2,
             child: Scaffold(
+              bottomNavigationBar: const Material(
+                  color: Colors.blue,
+                  child: TabBar(tabs: [
+                    Tab(icon: Icon(Icons.bookmark_sharp)),
+                    Tab(icon: Icon(Icons.auto_graph)),
+                  ])),
               appBar: AppBar(
-                  bottom: const TabBar(
-                    tabs: [
-                      Tab(icon: Icon(Icons.table_rows)),
-                      Tab(icon: Icon(Icons.auto_graph)),
-                    ],
-                  ),
-                  title: const Text('Welcome to Flutter'),
-                  actions: <Widget>[
-                    IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => OptionsView()),
-                          );
-                        },
-                        icon: const Icon(Icons.menu))
-                  ]),
+                title: const Text('Welcome to Flutter'),
+              ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () {
                   // Add your onPressed code here!
                   Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddExpenditureView()),
-                  ).then((_) => setState(() {}));
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AddExpenditureView()))
+                      .then((_) => setState(() {}));
                 },
                 backgroundColor: Colors.green,
                 child: const Icon(Icons.add),
               ),
               body: TabBarView(
                 children: [
-                  ExpenditureTab(),
-                  const Icon(Icons.auto_graph),
+                  ExpendituresListView(),
+                  PieChartSample2(),
                 ],
               ),
             )),
