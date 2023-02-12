@@ -30,12 +30,14 @@ class _ExpendituresState extends State<Expenditures> {
                   var row = snapshot.data?[index];
                   Expenditure exp = Expenditure(
                       title: row?['title'],
+                      category: row?['category'],
                       value: row?['value'],
                       date: DateTime.parse(row?['date']));
                   return ListTile(
-                    title: Text(
-                        '${DateFormat.yMd('fr_Fr').format(exp.date)} ${exp.title}'),
-                    subtitle: Text(exp.value.toString()),
+                    title: Text('${exp.category} ${exp.title}',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text(
+                        '${DateFormat.yMd('fr_Fr').format(exp.date)} ${exp.value.toString()}'),
                     onTap: () {
                       Navigator.push(
                         context,

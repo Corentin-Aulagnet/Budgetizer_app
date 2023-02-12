@@ -36,8 +36,22 @@ class _HomeWidgetState extends State<HomeWidget> {
                     Tab(icon: Icon(Icons.auto_graph)),
                   ])),
               appBar: AppBar(
-                title: const Text('Welcome to Flutter'),
-              ),
+                  title: const Text('Welcome to Flutter'),
+                  actions: <Widget>[
+                    IconButton(
+                      icon: const Icon(Icons.settings),
+                      tooltip: 'Options',
+                      onPressed: () {
+                        Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => OptionsView()))
+                            .then((_) => setState(() {}));
+                        //ScaffoldMessenger.of(context).showSnackBar(
+                        //  const SnackBar(content: Text('This is a snackbar')));'''
+                      },
+                    )
+                  ]),
               floatingActionButton: FloatingActionButton(
                 onPressed: () {
                   // Add your onPressed code here!
@@ -53,7 +67,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               body: TabBarView(
                 children: [
                   ExpendituresListView(),
-                  PieChartSample2(),
+                  StatisticsView(),
                 ],
               ),
             )),

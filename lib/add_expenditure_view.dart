@@ -17,7 +17,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   FocusNode title_FocusNode = new FocusNode();
   bool title_hasInputError = false;
   String title_text = '';
-
+  String category_text = '';
   DateTime date = DateTime.now();
   @override
   void initState() {
@@ -57,6 +57,21 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
                 // This optional block of code can be used to run
                 // code when the user saves the form.
                 if (value != null) title_text = value;
+              },
+              validator: (String? value) {
+                return (value != null) ? 'Do not use the @ char.' : null;
+              },
+            )),
+            Expanded(
+                child: TextFormField(
+              decoration: const InputDecoration(
+                hintText: 'category',
+                labelText: 'Category',
+              ),
+              onChanged: (String? value) {
+                // This optional block of code can be used to run
+                // code when the user saves the form.
+                if (value != null) category_text = value;
               },
               validator: (String? value) {
                 return (value != null) ? 'Do not use the @ char.' : null;
@@ -147,11 +162,12 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
     if (title_text == '' || value == 0.0 || date == DateTime(1800, 1, 1)) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              'All fields must be filled ${title_text == '' ? 'Title' : ''} ${value == 0.0 ? 'Amount' : ''}')));
+              'All fields must be filled ${title_text == '' ? 'Title' : ''} ${category_text == '' ? 'Category' : ''}${value == 0.0 ? 'Amount' : ''}')));
       return false;
     } else {
       await DatabaseHandler.InsertData({
         'title': title_text,
+        'category': category_text,
         'value': value,
         'date': date.toIso8601String()
       });
