@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:budgetizer/options_view.dart';
 import 'expenditures_list_view.dart';
 import 'add_expenditure_view.dart';
-import 'package:budgetizer/pie_chart.dart';
 
 class Home extends StatelessWidget {
   Home({super.key});
