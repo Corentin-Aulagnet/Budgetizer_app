@@ -33,62 +33,66 @@ class PieChart2State extends State<CategoryPie> {
   @override
   Widget build(BuildContext context) {
     type = widget.pieType;
-    return Card(
-        color: Colors.white,
-        child: Column(
-          children: [
-            Row(
-              children: <Widget>[
-                const SizedBox(
-                  height: 18,
-                ),
-                Expanded(
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: PieChart(
-                      PieChartData(
-                        pieTouchData: PieTouchData(
-                          touchCallback:
-                              (FlTouchEvent event, pieTouchResponse) {
-                            setState(() {
-                              if (!event.isInterestedForInteractions ||
-                                  pieTouchResponse == null ||
-                                  pieTouchResponse.touchedSection == null) {
-                                touchedIndex = -1;
-                                return;
-                              }
-                              touchedIndex = pieTouchResponse
-                                  .touchedSection!.touchedSectionIndex;
-                            });
-                          },
+    return Expanded(
+        child: Column(children: [
+      Card(
+          color: Colors.white,
+          child: Column(
+            children: [
+              Row(
+                children: <Widget>[
+                  const SizedBox(
+                    height: 18,
+                  ),
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: PieChart(
+                        PieChartData(
+                          pieTouchData: PieTouchData(
+                            touchCallback:
+                                (FlTouchEvent event, pieTouchResponse) {
+                              setState(() {
+                                if (!event.isInterestedForInteractions ||
+                                    pieTouchResponse == null ||
+                                    pieTouchResponse.touchedSection == null) {
+                                  touchedIndex = -1;
+                                  return;
+                                }
+                                touchedIndex = pieTouchResponse
+                                    .touchedSection!.touchedSectionIndex;
+                              });
+                            },
+                          ),
+                          borderData: FlBorderData(
+                            show: false,
+                          ),
+                          sectionsSpace: 0,
+                          centerSpaceRadius: 40,
+                          sections: showingSections(),
                         ),
-                        borderData: FlBorderData(
-                          show: false,
-                        ),
-                        sectionsSpace: 0,
-                        centerSpaceRadius: 40,
-                        sections: showingSections(),
                       ),
                     ),
                   ),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: showingIndicators(),
-                ),
-                const SizedBox(
-                  width: 28,
-                ),
-              ],
-            ),
-            Center(child: Row(children: showingDropDownButtons()))
-          ],
-        ));
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: showingIndicators(),
+                  ),
+                  const SizedBox(
+                    width: 28,
+                  ),
+                ],
+              ),
+              Center(child: Row(children: showingDropDownButtons())),
+            ],
+          )),
+      Flexible(child: ListView(children: showingListTiles()))
+    ]));
   }
 
   List<Widget> showingIndicators() {
-    Map<String, double> data = GetData();
+    Map<String, double> data = getData();
     return List.generate(data.length, (index) {
       return Column(children: <Widget>[
         Indicator(
@@ -104,7 +108,7 @@ class PieChart2State extends State<CategoryPie> {
   }
 
   List<PieChartSectionData> showingSections() {
-    Map<String, double> data = GetData();
+    Map<String, double> data = getData();
     return List.generate(data.length, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 25.0 : 16.0;
@@ -139,7 +143,7 @@ class PieChart2State extends State<CategoryPie> {
     });
   }
 
-  Map<String, double> GetData() {
+  Map<String, double> getData() {
     List<Expenditure> results = DatabaseHandler.expendituresList;
     List<Expenditure> dataToPlot = List.empty(growable: true);
     Set<String> categoriesToPlot = {};
@@ -261,6 +265,16 @@ class PieChart2State extends State<CategoryPie> {
         ),
       ];
     }
+  }
+
+  List<Widget> showingListTiles() {
+    Map<String, double> data = getData();
+    return List.generate(data.length, (index) {
+      return ListTile(
+          leading: Text(data.keys.elementAt(index)),
+          trailing: Text(
+              '${(data.values.elementAt(index) * totalValueDisplayed / 100).toStringAsFixed(2)}€'));
+    });
   }
 }
 

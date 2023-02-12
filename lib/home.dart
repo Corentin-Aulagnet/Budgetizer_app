@@ -28,7 +28,10 @@ class _HomeWidgetState extends State<HomeWidget> {
         builder: (context) => DefaultTabController(
             length: 2,
             child: Scaffold(
-              bottomNavigationBar: const Material(
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.centerDocked,
+              bottomNavigationBar: const BottomAppBar(
+                  shape: CircularNotchedRectangle(),
                   color: Colors.blue,
                   child: TabBar(tabs: [
                     Tab(icon: Icon(Icons.bookmark_sharp)),
