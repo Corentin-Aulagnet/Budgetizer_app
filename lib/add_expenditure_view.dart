@@ -1,7 +1,10 @@
+import 'package:budgetizer/Icons%20Selector/IconListTile.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart';
+import 'package:budgetizer/create_category_view.dart';
+import 'package:searchable_listview/searchable_listview.dart';
 
 class AddExpenditureView extends StatefulWidget {
   const AddExpenditureView({super.key});
@@ -17,7 +20,9 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   FocusNode title_FocusNode = new FocusNode();
   bool title_hasInputError = false;
   String title_text = '';
-  String category_text = '';
+  CategoryDescriptor category = DatabaseHandler.categoriesList.length > 0
+      ? DatabaseHandler.categoriesList[0]
+      : CategoryDescriptor.createPlaceholder();
   DateTime date = DateTime.now();
   @override
   void initState() {
@@ -35,20 +40,18 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add a new Expenditure'),
-        leading: const BackButton(),
-      ),
-      body: GestureDetector(
+    return GestureDetector(
         onTap: () {
           //called when the body of the screen is touched
-          FocusScope.of(context).requestFocus(new FocusNode());
+          FocusManager.instance.primaryFocus?.unfocus();
         },
-        child: Column(children: <Widget>[
-          Row(children: [
-            Expanded(
-                child: TextFormField(
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Add a new Expenditure'),
+            leading: const BackButton(),
+          ),
+          body: Column(children: <Widget>[
+            TextFormField(
               decoration: const InputDecoration(
                 hintText: 'title',
                 labelText: 'Title',
@@ -61,100 +64,131 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
               validator: (String? value) {
                 return (value != null) ? 'Do not use the @ char.' : null;
               },
-            )),
-            Expanded(
-                child: TextFormField(
-              decoration: const InputDecoration(
-                hintText: 'category',
-                labelText: 'Category',
-              ),
-              onChanged: (String? value) {
-                // This optional block of code can be used to run
-                // code when the user saves the form.
-                if (value != null) category_text = value;
-              },
-              validator: (String? value) {
-                return (value != null) ? 'Do not use the @ char.' : null;
-              },
-            ))
-          ]),
-          Row(
-            children: <Widget>[
+            ),
+            Row(children: [
+              Text("Category Selected"),
               Expanded(
-                  child: TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'amount',
-                  labelText: 'Amount',
-                ),
-                onChanged: (String? value) {
-                  // This optional block of code can be used to run
-                  // code when the user saves the form.
-                  if (value != null) this.value = double.parse(value);
-                },
-                validator: (String? value) {
-                  return (value != null &&
-                          value.contains(
-                              RegExp('[a-zA-Z&é\"\'()-è`_\\ç^à@\[\]=+\{\}]+')))
-                      ? 'Use only numbers'
-                      : null;
-                },
-              )),
-              Expanded(
-                child: DropdownButton<String>(
-                  value: currencySelected,
+                  child:
+                      CategoryItem(category: category, color: category.color))
+            ]),
+            Row(
+              children: <Widget>[
+                Expanded(
+                    child: TextFormField(
+                  decoration: const InputDecoration(
+                    hintText: 'amount',
+                    labelText: 'Amount',
+                  ),
                   onChanged: (String? value) {
-                    // This is called when the user selects an item.
-                    setState(() {
-                      currencySelected = value!; //Code to run
-                    });
+                    // This optional block of code can be used to run
+                    // code when the user saves the form.
+                    if (value != null) this.value = double.parse(value);
                   },
-                  items: <DropdownMenuItem<String>>[
-                    DropdownMenuItem(
-                        value: availableCurrencies[0],
-                        child: Text(availableCurrencies[0])),
-                    DropdownMenuItem(
-                        value: availableCurrencies[1],
-                        child: Text(availableCurrencies[1]))
-                  ],
+                  validator: (String? value) {
+                    return (value != null &&
+                            value.contains(RegExp(
+                                '[a-zA-Z&é\"\'()-è`_\\ç^à@\[\]=+\{\}]+')))
+                        ? 'Use only numbers'
+                        : null;
+                  },
+                )),
+                Expanded(
+                  child: DropdownButton<String>(
+                    value: currencySelected,
+                    onChanged: (String? value) {
+                      // This is called when the user selects an item.
+                      setState(() {
+                        currencySelected = value!; //Code to run
+                      });
+                    },
+                    items: <DropdownMenuItem<String>>[
+                      DropdownMenuItem(
+                          value: availableCurrencies[0],
+                          child: Text(availableCurrencies[0])),
+                      DropdownMenuItem(
+                          value: availableCurrencies[1],
+                          child: Text(availableCurrencies[1]))
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Row(children: <Widget>[
+              ],
+            ),
+            Row(children: <Widget>[
+              Expanded(
+                child: DateTimeField(
+                  initialValue: DateTime.now(),
+                  format: DateFormat.yMd('fr_Fr'),
+                  onShowPicker: (context, currentValue) {
+                    return showDatePicker(
+                        context: context,
+                        firstDate: DateTime(1900),
+                        initialDate: currentValue ?? DateTime.now(),
+                        lastDate: DateTime(2100));
+                  },
+                  onChanged: (DateTime? currentValue) =>
+                      {if (currentValue != null) date = currentValue},
+                ),
+              )
+            ]),
             Expanded(
-              child: DateTimeField(
-                initialValue: DateTime.now(),
-                format: DateFormat.yMd('fr_Fr'),
-                onShowPicker: (context, currentValue) {
-                  return showDatePicker(
-                      context: context,
-                      firstDate: DateTime(1900),
-                      initialDate: currentValue ?? DateTime.now(),
-                      lastDate: DateTime(2100));
-                },
-                onChanged: (DateTime? currentValue) =>
-                    {if (currentValue != null) date = currentValue},
-              ),
-            )
-          ])
-        ]),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        child: Container(height: 50.0),
-      ),
-      floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            bool added = await AddExpenditureToDatabase();
-            if (added) {
-              setState(() {
-                Navigator.of(context).pop();
-              });
-            }
-          },
-          child: const Icon(Icons.save)),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    );
+                flex: 10,
+                child: SearchableList<CategoryDescriptor>(
+                    initialList: DatabaseHandler.categoriesList +
+                        [
+                          CategoryDescriptor(
+                              icon: Icons.add,
+                              name: "Create a category",
+                              descriptors: [""],
+                              color: Color(0xff000000))
+                        ],
+                    filter: (value) => DatabaseHandler.categoriesList
+                        .where(
+                          (element) =>
+                              element.name.toLowerCase().contains(value),
+                        )
+                        .toList(),
+                    builder: (CategoryDescriptor category) =>
+                        CategoryItem(category: category, color: category.color),
+                    inputDecoration: InputDecoration(
+                      labelText: "Search Category",
+                      fillColor: Colors.white,
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Colors.blue,
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                    ),
+                    onItemSelected: (CategoryDescriptor category) {
+                      if (category.name == "Create a category") {
+                        //Push the view to create a category
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => CreateCategoryView()),
+                        ).then((_) => setState(() {}));
+                      } else {
+                        //Select the category
+                        setState(() {
+                          this.category = category;
+                        });
+                      }
+                    }))
+          ]),
+          floatingActionButton: FloatingActionButton(
+              onPressed: () async {
+                bool added = await AddExpenditureToDatabase();
+                if (added) {
+                  setState(() {
+                    Navigator.of(context).pop();
+                  });
+                }
+              },
+              child: const Icon(Icons.save)),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+        ));
   }
 
   Future<bool> AddExpenditureToDatabase() async {
@@ -162,12 +196,12 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
     if (title_text == '' || value == 0.0 || date == DateTime(1800, 1, 1)) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              'All fields must be filled ${title_text == '' ? 'Title' : ''} ${category_text == '' ? 'Category' : ''}${value == 0.0 ? 'Amount' : ''}')));
+              'All fields must be filled ${title_text == '' ? 'Title' : ''} ${category == '' ? 'Category' : ''}${value == 0.0 ? 'Amount' : ''}')));
       return false;
     } else {
       await DatabaseHandler.InsertData({
         'title': title_text,
-        'category': category_text,
+        'category': category.hash,
         'value': value,
         'date': date.toIso8601String()
       });

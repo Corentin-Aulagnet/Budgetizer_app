@@ -1,3 +1,4 @@
+import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/charts.dart' as PieCharts;
 
@@ -6,7 +7,11 @@ class StatisticsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Statistics();
+    if (DatabaseHandler.expendituresList.isNotEmpty) {
+      return Statistics();
+    } else {
+      return EmptyDataBaseStatistics();
+    }
   }
 }
 
@@ -67,4 +72,13 @@ class Statistics extends StatefulWidget {
   const Statistics({super.key});
   @override
   State<Statistics> createState() => _StatisticsState();
+}
+
+class EmptyDataBaseStatistics extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Text("Nothing to display\n Please add an expenditure in the list"),
+    );
+  }
 }

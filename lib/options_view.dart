@@ -21,10 +21,17 @@ class _OptionsViewState extends State<OptionsView> {
           leading: const BackButton(),
         ),
         body: Center(
-            child: TextButton(
-                child: const Text('Regenerate Database'),
-                onPressed: () {
-                  DatabaseHandler.RegenerateDatabase();
-                })));
+            child: Column(children: [
+          TextButton(
+              child: const Text('Regenerate Database'),
+              onPressed: () {
+                DatabaseHandler.RegenerateDatabase();
+              }),
+          TextButton(
+              child: const Text('Reset Categories'),
+              onPressed: () {
+                DatabaseHandler.DeleteCategories();
+              })
+        ])));
   }
 }

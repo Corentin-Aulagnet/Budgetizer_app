@@ -1,3 +1,4 @@
+import 'package:budgetizer/Icons%20Selector/IconListTile.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:budgetizer/indicator.dart';
@@ -25,8 +26,10 @@ class PieChart2State extends State<CategoryPie> {
   int touchedIndex = -1;
   late PieType type = widget.pieType;
   DateTime mmyy = DateTime(2021, 12);
-  String month = '12';
-  String year = '2021';
+  Set<String> months = {};
+  Set<String> years = {};
+  String month = DatabaseHandler.expendituresList.first.date.month.toString();
+  String year = DatabaseHandler.expendituresList.first.date.year.toString();
 
   double totalValueDisplayed = 0.0;
 
@@ -68,37 +71,44 @@ class PieChart2State extends State<CategoryPie> {
                             show: false,
                           ),
                           sectionsSpace: 0,
-                          centerSpaceRadius: 40,
                           sections: showingSections(),
                         ),
                       ),
                     ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: showingIndicators(),
-                  ),
+                  Center(child: Row(children: showingDropDownButtons())),
                   const SizedBox(
                     width: 28,
                   ),
                 ],
               ),
-              Center(child: Row(children: showingDropDownButtons())),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: showingIndicators(),
+              ),
             ],
           )),
-      Flexible(child: ListView(children: showingListTiles()))
+      /*Flexible(child: ListView(children: showingListTiles()))*/
     ]));
   }
 
   List<Widget> showingIndicators() {
-    Map<String, double> data = getData();
+    Map<CategoryDescriptor, double> data = getData();
     return List.generate(data.length, (index) {
       return Column(children: <Widget>[
-        Indicator(
-          color: colors[index],
-          text: data.keys.elementAt(index),
-          isSquare: true,
+        Row(
+          children: [
+            Indicator(
+              color: colors[index],
+              text: data.keys.elementAt(index).name,
+              isSquare: true,
+            ),
+            Icon(
+              data.keys.elementAt(index).icon,
+              color: data.keys.elementAt(index).color,
+            )
+          ],
         ),
         SizedBox(
           height: 4,
@@ -108,15 +118,15 @@ class PieChart2State extends State<CategoryPie> {
   }
 
   List<PieChartSectionData> showingSections() {
-    Map<String, double> data = getData();
+    Map<CategoryDescriptor, double> data = getData();
     return List.generate(data.length, (i) {
       final isTouched = i == touchedIndex;
-      final fontSize = isTouched ? 25.0 : 16.0;
+      final fontSize = isTouched ? 16.0 : 10.0;
       final radius = isTouched ? 60.0 : 50.0;
       return PieChartSectionData(
           color: colors[i],
           value: data.values.elementAt(i),
-          title: data.keys.elementAt(i),
+          title: data.keys.elementAt(i).name,
           radius: radius,
           titleStyle: TextStyle(
             fontSize: fontSize,
@@ -143,11 +153,11 @@ class PieChart2State extends State<CategoryPie> {
     });
   }
 
-  Map<String, double> getData() {
+  Map<CategoryDescriptor, double> getData() {
     List<Expenditure> results = DatabaseHandler.expendituresList;
     List<Expenditure> dataToPlot = List.empty(growable: true);
-    Set<String> categoriesToPlot = {};
-    Map<String, double> dataToPlotGroupedBycategories = {};
+    Set<CategoryDescriptor> categoriesToPlot = {};
+    Map<CategoryDescriptor, double> dataToPlotGroupedBycategories = {};
     totalValueDisplayed = 0.0;
     //Filters by date
     mmyy = DateTime(int.parse(year), int.parse(month));
@@ -194,7 +204,6 @@ class PieChart2State extends State<CategoryPie> {
 
   List<DropdownMenuItem<String>> getMonths() {
     List<Expenditure> results = DatabaseHandler.expendituresList;
-    Set<String> months = {};
     for (var element in results) {
       DateTime date = element.date;
       months.add(date.month.toString());
@@ -210,7 +219,6 @@ class PieChart2State extends State<CategoryPie> {
 
   List<DropdownMenuItem<String>> getYears() {
     List<Expenditure> results = DatabaseHandler.expendituresList;
-    Set<String> years = {};
     for (var element in results) {
       DateTime date = element.date;
       years.add(date.year.toString());
@@ -253,7 +261,7 @@ class PieChart2State extends State<CategoryPie> {
     } else {
       return <Widget>[
         DropdownButton<String>(
-          value: year,
+          value: years.first,
           onChanged: (String? value) {
             // This is called when the user selects an item.
             setState(() {
@@ -268,10 +276,12 @@ class PieChart2State extends State<CategoryPie> {
   }
 
   List<Widget> showingListTiles() {
-    Map<String, double> data = getData();
+    Map<CategoryDescriptor, double> data = getData();
     return List.generate(data.length, (index) {
       return ListTile(
-          leading: Text(data.keys.elementAt(index)),
+          leading: Icon(data.keys.elementAt(index).icon,
+              color: data.keys.elementAt(index).color),
+          title: Text(data.keys.elementAt(index).name),
           trailing: Text(
               '${(data.values.elementAt(index) * totalValueDisplayed / 100).toStringAsFixed(2)}€'));
     });

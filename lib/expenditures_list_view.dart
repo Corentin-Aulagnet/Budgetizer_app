@@ -19,7 +19,7 @@ class _ExpendituresState extends State<Expenditures> {
     return RefreshIndicator(
         onRefresh: refreshView,
         child: Scaffold(
-            body: FutureBuilder<List<Map<String, dynamic>>>(
+            body: FutureBuilder<List<Expenditure>>(
           future: DatabaseHandler.fetchData(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
@@ -27,23 +27,23 @@ class _ExpendituresState extends State<Expenditures> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 itemCount: snapshot.data?.length,
                 itemBuilder: (context, index) {
-                  var row = snapshot.data?[index];
-                  Expenditure exp = Expenditure(
-                      title: row?['title'],
-                      category: row?['category'],
-                      value: row?['value'],
-                      date: DateTime.parse(row?['date']));
+                  Expenditure row =
+                      snapshot.data?[index] ?? Expenditure.Error();
                   return ListTile(
-                    title: Text('${exp.category} ${exp.title}',
+                    title: Text('${row.title} | ${row.category.name}',
                         style: const TextStyle(fontWeight: FontWeight.bold)),
+                    trailing: Icon(
+                      row.category.icon,
+                      color: row.category.color,
+                    ),
                     subtitle: Text(
-                        '${DateFormat.yMd('fr_Fr').format(exp.date)} ${exp.value.toString()}'),
+                        '${DateFormat.yMd('fr_Fr').format(row.date)} ${row.value.toString()}€'),
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                ExpenditureView(expenditure: exp)),
+                                ExpenditureView(expenditure: row)),
                       );
                     },
                   );

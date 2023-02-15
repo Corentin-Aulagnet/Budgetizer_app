@@ -1,3 +1,4 @@
+import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/statistics_view.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/options_view.dart';
@@ -34,7 +35,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   shape: CircularNotchedRectangle(),
                   color: Colors.blue,
                   child: TabBar(tabs: [
-                    Tab(icon: Icon(Icons.bookmark_sharp)),
+                    Tab(icon: Icon(Icons.format_list_bulleted_rounded)),
                     Tab(icon: Icon(Icons.auto_graph)),
                   ])),
               appBar: AppBar(
@@ -49,8 +50,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 MaterialPageRoute(
                                     builder: (context) => OptionsView()))
                             .then((_) => setState(() {}));
-                        //ScaffoldMessenger.of(context).showSnackBar(
-                        //  const SnackBar(content: Text('This is a snackbar')));'''
                       },
                     )
                   ]),
