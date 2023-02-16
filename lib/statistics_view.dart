@@ -44,11 +44,6 @@ class _StatisticsState extends State<Statistics> {
               ));
         }).toList(),
       ),
-      Text(graphToDisplay,
-          style: const TextStyle(
-              color: Color(0xff000000),
-              fontStyle: FontStyle.normal,
-              fontWeight: FontWeight.bold)),
       GetChart(),
     ]));
   }

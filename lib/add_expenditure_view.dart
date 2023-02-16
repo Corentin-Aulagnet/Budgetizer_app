@@ -1,5 +1,6 @@
 import 'package:budgetizer/Icons%20Selector/IconListTile.dart';
 import 'package:budgetizer/database_handler.dart';
+import 'package:budgetizer/expenditure.dart';
 import 'package:flutter/material.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart';
@@ -40,6 +41,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
 
   @override
   Widget build(BuildContext context) {
+    DatabaseHandler().LoadCategories();
     return GestureDetector(
         onTap: () {
           //called when the body of the screen is touched
@@ -136,6 +138,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
                     initialList: DatabaseHandler.categoriesList +
                         [
                           CategoryDescriptor(
+                              id: 0,
                               icon: Icons.add,
                               name: "Create a category",
                               descriptors: [""],
@@ -199,12 +202,9 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
               'All fields must be filled ${title_text == '' ? 'Title' : ''} ${category == '' ? 'Category' : ''}${value == 0.0 ? 'Amount' : ''}')));
       return false;
     } else {
-      await DatabaseHandler.InsertData({
-        'title': title_text,
-        'category': category.hash,
-        'value': value,
-        'date': date.toIso8601String()
-      });
+      Expenditure exp = Expenditure(
+          title: title_text, category: category, value: value, date: date);
+      await DatabaseHandler().InsertData(exp);
     }
     return true;
   }

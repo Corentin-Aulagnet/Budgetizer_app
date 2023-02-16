@@ -173,12 +173,12 @@ class _CreateCategoryView extends State<CreateCategoryView> {
       return false;
     } else {
       icon.color = currentColor;
-      await DatabaseHandler.SaveCategory(CategoryDescriptor(
+      await DatabaseHandler().SaveCategory(CategoryDescriptor(
+          id: 0,
           icon: icon.icon,
           name: name,
           descriptors: icon.descriptors,
           color: currentColor));
-      await DatabaseHandler.LoadCategories();
       print(
           '${icon.icon.codePoint} ${icon.icon.fontFamily} ${icon.icon.fontPackage}');
     }

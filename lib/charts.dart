@@ -15,6 +15,20 @@ class CategoryPie extends StatefulWidget {
 
 enum PieType { monthly, yearly }
 
+Map<String, String> int2TextMonths = {
+  '1': 'jan',
+  '2': 'feb',
+  '3': 'mar',
+  '4': 'apr',
+  '5': 'may',
+  '6': 'jun',
+  '7': 'jul',
+  '8': 'aug',
+  '9': 'sep',
+  '10': 'oct',
+  '11': 'nov',
+  '12': 'dec'
+};
 List<Color> colors = <Color>[
   const Color(0xff0293ee),
   const Color(0xfff8b250),
@@ -42,6 +56,12 @@ class PieChart2State extends State<CategoryPie> {
           color: Colors.white,
           child: Column(
             children: [
+              Row(children: <Widget>[
+                const SizedBox(
+                  width: 28,
+                ),
+                Row(children: showingDropDownButtons())
+              ]),
               Row(
                 children: <Widget>[
                   const SizedBox(
@@ -71,14 +91,11 @@ class PieChart2State extends State<CategoryPie> {
                             show: false,
                           ),
                           sectionsSpace: 0,
+                          centerSpaceRadius: 80,
                           sections: showingSections(),
                         ),
                       ),
                     ),
-                  ),
-                  Center(child: Row(children: showingDropDownButtons())),
-                  const SizedBox(
-                    width: 28,
                   ),
                 ],
               ),
@@ -212,7 +229,7 @@ class PieChart2State extends State<CategoryPie> {
       return DropdownMenuItem<String>(
           value: months.elementAt(index),
           child: Text(
-            months.elementAt(index),
+            int2TextMonths[months.elementAt(index)]!,
           ));
     });
   }

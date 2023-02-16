@@ -10,58 +10,29 @@ class CategoryDescriptor {
   late Color color; // used in hash
   late String fontPackage;
   late String fontFamily;
-  late String hash;
+  late int id;
 
   CategoryDescriptor(
       {required this.icon,
       required this.name,
       required this.descriptors,
       required this.color,
+      required this.id,
       this.fontFamily = '',
-      this.fontPackage = ''}) {
-    var bytes = utf8.encode(icon.hashCode.toString() +
-        name +
-        descriptors.join('') +
-        color.toString());
-    hash = '${sha256.convert(bytes)}';
-  }
+      this.fontPackage = ''});
   CategoryDescriptor.createPlaceholder() {
-    this.icon = Icons.image;
-    this.name = "Your category";
+    this.id = 0;
+    this.icon = Icons.warning;
+    this.name = "No category";
     this.descriptors = [""];
-    this.color = Color(0xff000000);
+    this.color = Color(0xffff0000);
     this.fontFamily = '';
     this.fontPackage = '';
   }
-  CategoryDescriptor.fromJSON(Map<String, dynamic> json)
-      : icon = IconData(int.parse(json['icon']),
-            fontFamily: json['fontFamily'], fontPackage: json['fontPackage']),
-        fontFamily = json['fontFamily'] ?? '',
-        fontPackage = json['fontPackage'] ?? '',
-        name = json['name'],
-        descriptors = List.generate(json['desc'].toString().split('-').length,
-            (index) => json['desc'].toString().split('-')[index]),
-        color = Color(int.parse('0x${json['color']}')) {
-    var bytes = utf8.encode(icon.hashCode.toString() +
-        name +
-        descriptors.join('') +
-        color.toString());
-    hash = '${sha256.convert(bytes)}';
-  }
-
-  Map<String, dynamic> toJSON() => {
-        'icon': icon.codePoint.toString(),
-        'fontFamily': icon.fontFamily,
-        'fontPackage': icon.fontPackage,
-        'name': name,
-        'desc': descriptors.join('-'),
-        'color': color.toString().split('(0x')[1].split(')')[0],
-        'hash': hash
-      };
 
   @override
   String toString() {
-    return '{icon : ${icon.codePoint.toString()}, fontFamily: $icon.fontFamily, fontPacakage: $icon.fontPackage, name : $name, desc : ${descriptors.join('-')}, color : ${color.toString()}';
+    return '{icon : ${icon.codePoint.toString()}, fontFamily: ${icon.fontFamily}, fontPackage: ${icon.fontPackage}, name : $name, desc : ${descriptors.join('-')}, color : ${color.toString()}}';
   }
 
   String display() {
@@ -97,7 +68,6 @@ class IconItem extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    DatabaseHandler.LoadCategories();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
@@ -154,7 +124,6 @@ class CategoryItem extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    DatabaseHandler.LoadCategories();
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
