@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:crypto/crypto.dart';
+import 'package:budgetizer/add_expenditure_view.dart';
 
 class CategoryDescriptor {
   late IconData icon; //used in hash
@@ -20,7 +20,7 @@ class CategoryDescriptor {
       required this.id,
       this.fontFamily = '',
       this.fontPackage = ''});
-  CategoryDescriptor.createPlaceholder() {
+  CategoryDescriptor.Error() {
     this.id = 0;
     this.icon = Icons.warning;
     this.name = "No category";
@@ -115,13 +115,17 @@ class IconItem extends StatelessWidget {
 }
 
 class CategoryItem extends StatelessWidget {
+  final Function() notifyParent;
   final CategoryDescriptor category;
   final Color color;
-  const CategoryItem({
-    Key? key,
-    required this.category,
-    required this.color,
-  }) : super(key: key);
+  final bool displayBin;
+  const CategoryItem(
+      {Key? key,
+      required this.category,
+      required this.color,
+      required this.notifyParent,
+      this.displayBin = true})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -163,9 +167,58 @@ class CategoryItem extends StatelessWidget {
                 ),
               ],
             ),
+            Spacer(),
+            buildBinButton(context, category)
           ],
         ),
       ),
     );
+  }
+
+  StatelessWidget buildBinButton(
+      BuildContext context, CategoryDescriptor category) {
+    return displayBin
+        ? IconButton(
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) => AlertDialog(
+                        title: Text('Delete Category ${category.name}'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                                "Do you really want to delete the category ${category.name}"),
+                            Text(
+                                "It is used by ${DatabaseHandler.CountExpensesInCategory(category)} expenses in the database")
+                          ],
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () async {
+                              await DatabaseHandler().DeleteCategory(category);
+                              await notifyParent();
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text(
+                              'Delete',
+                              style: TextStyle(color: Color(0xffff0000)),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      ));
+            },
+            icon: const Icon(
+              Icons.delete,
+              color: Color(0xffff0000),
+            ))
+        : const Spacer();
   }
 }

@@ -75,7 +75,7 @@ class DatabaseHandler {
           title: element['title'].toString(),
           category:
               MatchCategory(int.parse(element['categoryID'].toString())) ??
-                  CategoryDescriptor.createPlaceholder(),
+                  CategoryDescriptor.Error(),
           value: double.parse(element['value'].toString()),
           date: DateTime.parse(element['date'].toString())));
     }
@@ -106,6 +106,15 @@ class DatabaseHandler {
     categoriesList.clear();
   }
 
+  Future<void> DeleteCategory(CategoryDescriptor category) async {
+    categoriesList.remove(category);
+    int categoryID = category.id;
+    await db
+        .delete(categoriesTableName, where: 'id = ?', whereArgs: [categoryID]);
+    await db.update(expensesTableName, {'categoryID': '-1'},
+        where: 'categoryID = ?', whereArgs: [categoryID]);
+  }
+
   Future<void> SaveCategory(CategoryDescriptor category) async {
     print(category);
     categoriesList.add(category);
@@ -128,7 +137,6 @@ class DatabaseHandler {
     var data = await db.query(categoriesTableName);
 
     categoriesList.clear();
-    print(data.length);
     for (var row in data) {
       CategoryDescriptor category = CategoryDescriptor(
           id: int.parse(row['id'].toString()),
@@ -145,8 +153,6 @@ class DatabaseHandler {
           fontFamily: row['fontFamily'].toString(),
           fontPackage: row['fontPackage'].toString());
       categoriesList.add(category);
-      print('Font family Loaded : ${categoriesList.last.icon.fontFamily}');
-      print('Category loaded : ${categoriesList.last}');
     }
   }
 
@@ -154,7 +160,15 @@ class DatabaseHandler {
     for (CategoryDescriptor category in categoriesList) {
       if (category.id == id) {
         return category;
+      } else if (category.id == -1) {
+        return CategoryDescriptor.Error();
       }
     }
+  }
+
+  static int CountExpensesInCategory(CategoryDescriptor category) {
+    return expendituresList
+        .where((element) => element.category.id == category.id)
+        .length;
   }
 }

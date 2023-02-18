@@ -45,7 +45,6 @@ dependencies:
   fl_chart: ^0.55.2
   searchable_listview: ^2.2.1
   flutter_colorpicker: ^1.0.3
-  
 dev_dependencies:
   flutter_test:
     sdk: flutter

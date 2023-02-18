@@ -12,7 +12,7 @@ class Expenditure {
       required this.date});
   Expenditure.Error() {
     title = '';
-    category = CategoryDescriptor.createPlaceholder();
+    category = CategoryDescriptor.Error();
     value = double.nan;
     date = DateTime.now();
   }

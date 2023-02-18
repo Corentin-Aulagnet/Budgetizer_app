@@ -12,7 +12,7 @@ class CreateCategoryView extends StatefulWidget {
 
 class _CreateCategoryView extends State<CreateCategoryView> {
   late IconDescriptor icon = icons[0];
-  late String name;
+  late String name = '';
   Color pickerColor = Color(0xff443a49);
   Color currentColor = Color(0xff443a49);
   void changeColor(Color color) {
@@ -155,8 +155,7 @@ class _CreateCategoryView extends State<CreateCategoryView> {
           ]),
           floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                AddCategory();
-                Navigator.of(context).pop();
+                if (await AddCategory()) Navigator.of(context).pop();
               },
               child: const Icon(Icons.save)),
           floatingActionButtonLocation:

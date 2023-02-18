@@ -23,7 +23,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   String title_text = '';
   CategoryDescriptor category = DatabaseHandler.categoriesList.length > 0
       ? DatabaseHandler.categoriesList[0]
-      : CategoryDescriptor.createPlaceholder();
+      : CategoryDescriptor.Error();
   DateTime date = DateTime.now();
   @override
   void initState() {
@@ -70,8 +70,12 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
             Row(children: [
               Text("Category Selected"),
               Expanded(
-                  child:
-                      CategoryItem(category: category, color: category.color))
+                  child: CategoryItem(
+                category: category,
+                color: category.color,
+                notifyParent: () {},
+                displayBin: false,
+              ))
             ]),
             Row(
               children: <Widget>[
@@ -135,6 +139,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
             Expanded(
                 flex: 10,
                 child: SearchableList<CategoryDescriptor>(
+                    key: UniqueKey(),
                     initialList: DatabaseHandler.categoriesList +
                         [
                           CategoryDescriptor(
@@ -150,8 +155,22 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
                               element.name.toLowerCase().contains(value),
                         )
                         .toList(),
-                    builder: (CategoryDescriptor category) =>
-                        CategoryItem(category: category, color: category.color),
+                    builder: (CategoryDescriptor category) {
+                      if (category.name == "Create a category") {
+                        return CategoryItem(
+                          category: category,
+                          color: category.color,
+                          notifyParent: () {},
+                          displayBin: false,
+                        );
+                      } else {
+                        return CategoryItem(
+                          category: category,
+                          color: category.color,
+                          notifyParent: refresh,
+                        );
+                      }
+                    },
                     inputDecoration: InputDecoration(
                       labelText: "Search Category",
                       fillColor: Colors.white,
@@ -192,6 +211,12 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
         ));
+  }
+
+  refresh() async {
+    print('refresh');
+    await DatabaseHandler().LoadCategories();
+    setState(() {});
   }
 
   Future<bool> AddExpenditureToDatabase() async {
