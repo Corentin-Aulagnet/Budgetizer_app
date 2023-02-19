@@ -21,7 +21,7 @@ class CategoryDescriptor {
       this.fontFamily = '',
       this.fontPackage = ''});
   CategoryDescriptor.Error() {
-    this.id = 0;
+    this.id = -1;
     this.icon = Icons.warning;
     this.name = "No category";
     this.descriptors = [""];
@@ -32,7 +32,7 @@ class CategoryDescriptor {
 
   @override
   String toString() {
-    return '{icon : ${icon.codePoint.toString()}, fontFamily: ${icon.fontFamily}, fontPackage: ${icon.fontPackage}, name : $name, desc : ${descriptors.join('-')}, color : ${color.toString()}}';
+    return '{id: ${id}, icon : ${icon.codePoint.toString()}, fontFamily: ${icon.fontFamily}, fontPackage: ${icon.fontPackage}, name : $name, desc : ${descriptors.join('-')}, color : ${color.toString()}}';
   }
 
   String display() {

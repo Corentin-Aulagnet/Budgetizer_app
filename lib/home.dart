@@ -1,4 +1,5 @@
 import 'package:budgetizer/database_handler.dart';
+import 'package:budgetizer/expenditure.dart';
 import 'package:budgetizer/statistics_view.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/options_view.dart';

@@ -20,6 +20,8 @@ class DatabaseHandler {
   static List<Expenditure> expendituresList = List.empty(growable: true);
   static List<CategoryDescriptor> categoriesList = List.empty(growable: true);
 
+  static DateTime defaultDate = DateTime(1970);
+
   late Database db;
 
   DatabaseHandler._privateConstructor();
@@ -72,6 +74,7 @@ class DatabaseHandler {
     expendituresList.clear();
     for (var element in data) {
       expendituresList.add(Expenditure(
+          dataBaseId: int.parse(element['id'].toString()),
           title: element['title'].toString(),
           category:
               MatchCategory(int.parse(element['categoryID'].toString())) ??
@@ -90,9 +93,30 @@ class DatabaseHandler {
       'value': expenditure.value,
       'date': expenditure.date.toIso8601String()
     };
-
-    print(mapToInsert);
     await db.insert(expensesTableName, mapToInsert);
+  }
+
+  Future<void> UpdateData(Expenditure expenditure) async {
+    Map<String, dynamic> mapToInsert = {
+      'title': expenditure.title,
+      'categoryID': expenditure.category.id,
+      'value': expenditure.value,
+      'date': expenditure.date.toIso8601String()
+    };
+    if (expenditure.dataBaseId == -1) {
+      //No expenses to modify in database
+      //Insert a new expense
+      await InsertData(expenditure);
+    } else {
+      await db.update(expensesTableName, mapToInsert,
+          where: 'id = ?', whereArgs: [expenditure.dataBaseId]);
+    }
+  }
+
+  Future<void> DeleteExpense(Expenditure exp) async {
+    expendituresList.remove(exp);
+    int id = exp.dataBaseId;
+    await db.delete(expensesTableName, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> RegenerateDatabase() async {

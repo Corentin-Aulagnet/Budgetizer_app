@@ -44,7 +44,7 @@ class _ExpendituresState extends State<Expenditures> {
                         MaterialPageRoute(
                             builder: (context) =>
                                 ExpenditureView(expenditure: row)),
-                      );
+                      ).then((_) => setState(() {}));
                     },
                   );
                 },

@@ -29,6 +29,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+    
 
 
 
@@ -45,6 +46,9 @@ dependencies:
   fl_chart: ^0.55.2
   searchable_listview: ^2.2.1
   flutter_colorpicker: ^1.0.3
+  material_design_icons_flutter : ^6.0.7096
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
