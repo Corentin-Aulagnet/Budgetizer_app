@@ -1,6 +1,7 @@
 import 'package:budgetizer/Icons%20Selector/IconListTile.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
+import 'package:budgetizer/home.dart';
 import 'package:flutter/material.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart';
@@ -27,21 +28,12 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   List<String> availableCurrencies = ["€Eur", "\$US"];
   String currencySelected = '';
 
-  FocusNode titleFocusNode = FocusNode();
   bool titleHasInputError = false;
 
   @override
   void initState() {
     super.initState();
     currencySelected = availableCurrencies[0];
-
-    titleFocusNode.addListener(() {
-      if (!titleFocusNode.hasFocus) {
-        setState(() {
-          //title_hasInputError = //Check your conditions on text variable
-        });
-      }
-    });
   }
 
   Widget titleFieldForm() {
@@ -89,11 +81,11 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         initialList: DatabaseHandler.categoriesList +
             [
               CategoryDescriptor(
-                  id: 0,
-                  icon: Icons.add,
-                  name: "Create a category",
-                  descriptors: [""],
-                  color: Color(0xff000000))
+                id: 0,
+                emoji: '\u2795',
+                name: "Create a category",
+                descriptors: [""],
+              )
             ],
         filter: (value) => DatabaseHandler.categoriesList
             .where(
@@ -104,14 +96,12 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           if (category.name == "Create a category") {
             return CategoryItem(
               category: category,
-              color: category.color,
               notifyParent: () {},
               displayBin: false,
             );
           } else {
             return CategoryItem(
               category: category,
-              color: category.color,
               notifyParent: refresh,
             );
           }
@@ -121,7 +111,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           fillColor: Colors.white,
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(
-              color: Colors.blue,
+              color: Color(primaryColor),
               width: 1.0,
             ),
             borderRadius: BorderRadius.circular(10.0),
@@ -137,7 +127,6 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           } else {
             //Select the category
             setState(() {
-              //this.category = category;
               widget.expenditure.category = category;
             });
           }
@@ -147,6 +136,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   @override
   Widget build(BuildContext context) {
     DatabaseHandler().LoadCategories();
+    FocusManager.instance.primaryFocus?.unfocus();
     return GestureDetector(
         onTap: () {
           //called when the body of the screen is touched
@@ -165,7 +155,6 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
               Expanded(
                   child: CategoryItem(
                 category: widget.expenditure.category,
-                color: widget.expenditure.category.color,
                 notifyParent: () {},
                 displayBin: false,
               ))

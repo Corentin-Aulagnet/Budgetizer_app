@@ -112,7 +112,6 @@ class ExpenditureViewState extends State<ExpenditureView> {
                   flex: 2,
                   child: CategoryItem(
                     category: widget.expenditure.category,
-                    color: widget.expenditure.category.color,
                     notifyParent: () {},
                     displayBin: false,
                   ))

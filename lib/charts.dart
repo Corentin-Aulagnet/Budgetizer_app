@@ -121,10 +121,7 @@ class PieChart2State extends State<CategoryPie> {
               text: data.keys.elementAt(index).name,
               isSquare: true,
             ),
-            Icon(
-              data.keys.elementAt(index).icon,
-              color: data.keys.elementAt(index).color,
-            )
+            Text(data.keys.elementAt(index).emoji)
           ],
         ),
         SizedBox(
@@ -296,8 +293,7 @@ class PieChart2State extends State<CategoryPie> {
     Map<CategoryDescriptor, double> data = getData();
     return List.generate(data.length, (index) {
       return ListTile(
-          leading: Icon(data.keys.elementAt(index).icon,
-              color: data.keys.elementAt(index).color),
+          leading: Text(data.keys.elementAt(index).emoji),
           title: Text(data.keys.elementAt(index).name),
           trailing: Text(
               '${(data.values.elementAt(index) * totalValueDisplayed / 100).toStringAsFixed(2)}€'));

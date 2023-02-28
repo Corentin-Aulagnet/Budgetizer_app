@@ -1,10 +1,23 @@
-import 'package:budgetizer/database_handler.dart';
-import 'package:budgetizer/expenditure.dart';
 import 'package:budgetizer/statistics_view.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/options_view.dart';
 import 'expenditures_list_view.dart';
 import 'add_expenditure_view.dart';
+
+const int primaryColor = 0xffed4423;
+const int secondaryColor = 0xffcccccc;
+Map<int, Color> primaryColorSwatch = {
+  50: const Color.fromRGBO(239, 68, 35, 0.1),
+  100: const Color.fromRGBO(239, 68, 35, 0.2),
+  200: const Color.fromRGBO(239, 68, 35, 0.3),
+  300: const Color.fromRGBO(239, 68, 35, 0.4),
+  400: const Color.fromRGBO(239, 68, 35, 0.5),
+  500: const Color.fromRGBO(239, 68, 35, 0.6),
+  600: const Color.fromRGBO(239, 68, 35, 0.7),
+  700: const Color.fromRGBO(239, 68, 35, 0.8),
+  800: const Color.fromRGBO(239, 68, 35, 0.9),
+  900: const Color.fromRGBO(239, 68, 35, 1),
+};
 
 class Home extends StatelessWidget {
   Home({super.key});
@@ -25,7 +38,9 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Welcome to Flutter',
+      theme: ThemeData(
+          primarySwatch: MaterialColor(primaryColor, primaryColorSwatch)),
+      title: 'Welcome to LedgerStats',
       home: Builder(
         builder: (context) => DefaultTabController(
             length: 2,
@@ -34,7 +49,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                   FloatingActionButtonLocation.centerDocked,
               bottomNavigationBar: const BottomAppBar(
                   shape: CircularNotchedRectangle(),
-                  color: Colors.blue,
+                  color: Color(primaryColor),
                   child: TabBar(tabs: [
                     Tab(icon: Icon(Icons.format_list_bulleted_rounded)),
                     Tab(icon: Icon(Icons.auto_graph)),
@@ -63,7 +78,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                               builder: (context) => AddExpenditureView()))
                       .then((_) => setState(() {}));
                 },
-                backgroundColor: Colors.green,
+                backgroundColor: const Color(secondaryColor),
                 child: const Icon(Icons.add),
               ),
               body: TabBarView(

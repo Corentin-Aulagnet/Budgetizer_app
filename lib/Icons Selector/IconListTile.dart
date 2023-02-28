@@ -1,38 +1,28 @@
-import 'dart:convert';
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:budgetizer/add_expenditure_view.dart';
 
 class CategoryDescriptor {
-  late IconData icon; //used in hash
+  late String emoji;
   late String name; //used in hash
   late List<String> descriptors; //used in hash
-  late Color color; // used in hash
-  late String fontPackage;
-  late String fontFamily;
   late int id;
 
-  CategoryDescriptor(
-      {required this.icon,
-      required this.name,
-      required this.descriptors,
-      required this.color,
-      required this.id,
-      this.fontFamily = '',
-      this.fontPackage = ''});
+  CategoryDescriptor({
+    required this.name,
+    required this.emoji,
+    required this.descriptors,
+    required this.id,
+  });
   CategoryDescriptor.Error() {
     this.id = -1;
-    this.icon = Icons.warning;
     this.name = "No category";
     this.descriptors = [""];
-    this.color = Color(0xffff0000);
-    this.fontFamily = '';
-    this.fontPackage = '';
+    this.emoji = '\u26A0';
   }
 
   @override
   String toString() {
-    return '{id: ${id}, icon : ${icon.codePoint.toString()}, fontFamily: ${icon.fontFamily}, fontPackage: ${icon.fontPackage}, name : $name, desc : ${descriptors.join('-')}, color : ${color.toString()}}';
+    return '{id: ${id}, emoji : $emoji, name : $name, desc : ${descriptors.join('-')}}';
   }
 
   String display() {
@@ -43,18 +33,19 @@ class CategoryDescriptor {
 class IconDescriptor {
   late IconData icon;
   late String name;
-  late List<String> descriptors;
   late Color color;
   late String fontPackage;
   late String fontFamily;
 
-  IconDescriptor(
-      {required this.icon, required this.name, required this.descriptors});
+  IconDescriptor({
+    required this.icon,
+    required this.name,
+  });
   IconDescriptor.CreateEmpty();
 
   @override
   String toString() {
-    return '{icon : ${icon.codePoint.toString()}, fontFamily: $icon.fontFamily, fontPacakage: $icon.fontPackage, name : $name, desc : ${descriptors.join('-')}, color : ${color.toString()}';
+    return '{icon : ${icon.codePoint.toString()}, fontFamily: $icon.fontFamily, fontPacakage: $icon.fontPackage, name : $name, color : ${color.toString()}';
   }
 }
 
@@ -99,12 +90,6 @@ class IconItem extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Text(
-                  icon.descriptors.join('-'),
-                  style: const TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
               ],
             ),
           ],
@@ -117,12 +102,10 @@ class IconItem extends StatelessWidget {
 class CategoryItem extends StatelessWidget {
   final Function() notifyParent;
   final CategoryDescriptor category;
-  final Color color;
   final bool displayBin;
   const CategoryItem(
       {Key? key,
       required this.category,
-      required this.color,
       required this.notifyParent,
       this.displayBin = true})
       : super(key: key);
@@ -141,10 +124,7 @@ class CategoryItem extends StatelessWidget {
             const SizedBox(
               width: 10,
             ),
-            Icon(
-              category.icon,
-              color: color,
-            ),
+            Text(category.emoji),
             const SizedBox(
               width: 10,
             ),

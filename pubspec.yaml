@@ -38,16 +38,15 @@ dependencies:
   cupertino_icons: ^1.0.2
   english_words: ^4.0.0
   sqflite: ^2.0.3+1
-  path: ^1.8.1
+  path: ^1.8.2
   faker: ^2.1.0
   random_date: ^0.0.7
-  intl: ^0.17.0
+  intl: ^0.18.0
   datetime_picker_formfield: ^2.0.1
-  fl_chart: ^0.55.2
+  fl_chart: ^0.61.0
   searchable_listview: ^2.2.1
-  flutter_colorpicker: ^1.0.3
   material_design_icons_flutter : ^6.0.7096
-
+  font_awesome_flutter: ^10.4.0
 
 dev_dependencies:
   flutter_test:

@@ -46,7 +46,7 @@ class DatabaseHandler {
       onCreate: (Database db, int version) async {
         // Run the CREATE TABLE statement on the database
         await db.execute(
-            'CREATE TABLE $categoriesTableName (id INTEGER PRIMARY KEY, name TEXT, descriptors TEXT, icon TEXT, color TEXT, fontFamily TEXT, fontPackage TEXT)');
+            'CREATE TABLE $categoriesTableName (id INTEGER PRIMARY KEY, name TEXT, descriptors TEXT, icon TEXT, color TEXT)');
         await db.execute(
             'CREATE TABLE $expensesTableName (id INTEGER PRIMARY KEY, title TEXT,  categoryID INTEGER, value DOUBLE, date DATE, FOREIGN KEY (categoryID) REFERENCES $categoriesTableName (id)  )');
       },
@@ -146,12 +146,7 @@ class DatabaseHandler {
     print('Category saved : ${category}');
     mapToInsert['name'] = category.name;
     mapToInsert['descriptors'] = category.descriptors.join('-');
-    mapToInsert['icon'] = category.icon.codePoint.toString();
-    mapToInsert['color'] =
-        category.color.toString().split('(0x')[1].split(')')[0];
-    mapToInsert['fontFamily'] = category.icon.fontFamily;
-    print('Font Family saved ${mapToInsert['fontFamily']}');
-    mapToInsert['fontPackage'] = category.icon.fontPackage;
+    mapToInsert['icon'] = category.emoji;
     //Updates the id of the category in the app
     categoriesList.last.id = await db.insert(categoriesTableName, mapToInsert);
   }
@@ -164,18 +159,9 @@ class DatabaseHandler {
     for (var row in data) {
       CategoryDescriptor category = CategoryDescriptor(
           id: int.parse(row['id'].toString()),
-          icon: IconData(int.parse(row['icon'].toString()),
-              fontFamily: row['fontFamily'].toString() == 'null'
-                  ? null
-                  : row['fontFamily'].toString(),
-              fontPackage: row['fontPackage'].toString() == 'null'
-                  ? null
-                  : row['fontPackage'].toString()),
+          emoji: row['icon'].toString(),
           name: row['name'].toString(),
-          descriptors: row['descriptors'].toString().split('-'),
-          color: Color(int.parse('0x${row['color']}')),
-          fontFamily: row['fontFamily'].toString(),
-          fontPackage: row['fontPackage'].toString());
+          descriptors: row['descriptors'].toString().split('-'));
       categoriesList.add(category);
     }
   }

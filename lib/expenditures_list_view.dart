@@ -32,10 +32,7 @@ class _ExpendituresState extends State<Expenditures> {
                   return ListTile(
                     title: Text('${row.title} | ${row.category.name}',
                         style: const TextStyle(fontWeight: FontWeight.bold)),
-                    trailing: Icon(
-                      row.category.icon,
-                      color: row.category.color,
-                    ),
+                    trailing: Text(row.category.emoji),
                     subtitle: Text(
                         '${DateFormat.yMd('fr_Fr').format(row.date)} ${row.value.toString()}€'),
                     onTap: () {
