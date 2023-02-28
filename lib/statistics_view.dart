@@ -1,6 +1,6 @@
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
-import 'package:budgetizer/charts.dart' as PieCharts;
+import 'package:budgetizer/charts.dart' as pie_charts;
 
 class StatisticsView extends StatelessWidget {
   StatisticsView({super.key});
@@ -10,7 +10,7 @@ class StatisticsView extends StatelessWidget {
     if (DatabaseHandler.expendituresList.isNotEmpty) {
       return Statistics();
     } else {
-      return EmptyDataBaseStatistics();
+      return const EmptyDataBaseStatistics();
     }
   }
 }
@@ -44,20 +44,20 @@ class _StatisticsState extends State<Statistics> {
               ));
         }).toList(),
       ),
-      GetChart(),
+      getChart(),
     ]));
   }
 
-  Widget GetChart() {
+  Widget getChart() {
     switch (graphToDisplay) {
       case 'Category Pie - Monthly':
-        return PieCharts.CategoryPie(pieType: PieCharts.PieType.monthly);
+        return pie_charts.CategoryPie(pieType: pie_charts.PieType.monthly);
 
       case 'Category Pie - Yearly':
-        return PieCharts.CategoryPie(pieType: PieCharts.PieType.yearly);
+        return pie_charts.CategoryPie(pieType: pie_charts.PieType.yearly);
 
       case 'Category Bar':
-        return PieCharts.CategoryPie(pieType: PieCharts.PieType.monthly);
+        return pie_charts.CategoryPie(pieType: pie_charts.PieType.monthly);
     }
     throw ErrorWidget(const Text("No valid chart selected"));
   }
@@ -70,9 +70,11 @@ class Statistics extends StatefulWidget {
 }
 
 class EmptyDataBaseStatistics extends StatelessWidget {
+  const EmptyDataBaseStatistics({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Text("Nothing to display\n Please add an expenditure in the list"),
     );
   }

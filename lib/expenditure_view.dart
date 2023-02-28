@@ -1,4 +1,4 @@
-import 'package:budgetizer/Icons%20Selector/IconListTile.dart';
+import 'package:budgetizer/Icons_Selector/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
 import 'expenditure.dart';
@@ -39,7 +39,7 @@ class ExpenditureViewState extends State<ExpenditureView> {
                           TextButton(
                             onPressed: () async {
                               await DatabaseHandler()
-                                  .DeleteExpense(widget.expenditure);
+                                  .deleteExpense(widget.expenditure);
                               Navigator.of(context).pop();
                             },
                             child: const Text(

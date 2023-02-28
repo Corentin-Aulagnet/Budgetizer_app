@@ -6,7 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   DatabaseHandler databaseHandler = DatabaseHandler();
-  await databaseHandler.InitializeDatabaseConnexion();
+  await databaseHandler.initializeDatabaseConnexion();
   initializeDateFormatting('fr_FR', null);
   runApp(MyApp());
 }

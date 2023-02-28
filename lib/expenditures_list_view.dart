@@ -28,7 +28,7 @@ class _ExpendituresState extends State<Expenditures> {
                 itemCount: snapshot.data?.length,
                 itemBuilder: (context, index) {
                   Expenditure row =
-                      snapshot.data?[index] ?? Expenditure.Error();
+                      snapshot.data?[index] ?? Expenditure.error();
                   return ListTile(
                     title: Text('${row.title} | ${row.category.name}',
                         style: const TextStyle(fontWeight: FontWeight.bold)),

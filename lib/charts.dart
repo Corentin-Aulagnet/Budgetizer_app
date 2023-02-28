@@ -1,4 +1,4 @@
-import 'package:budgetizer/Icons%20Selector/IconListTile.dart';
+import 'package:budgetizer/Icons_Selector/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:budgetizer/indicator.dart';
@@ -124,7 +124,7 @@ class PieChart2State extends State<CategoryPie> {
             Text(data.keys.elementAt(index).emoji)
           ],
         ),
-        SizedBox(
+        const SizedBox(
           height: 4,
         )
       ]);
@@ -149,7 +149,7 @@ class PieChart2State extends State<CategoryPie> {
           ),
           badgeWidget: isTouched
               ? Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
                     borderRadius: BorderRadius.circular(10),

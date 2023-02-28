@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:budgetizer/Icons Selector/IconListTile.dart';
+import 'package:budgetizer/Icons_Selector/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/services.dart';
 
@@ -63,7 +63,7 @@ class _CreateCategoryView extends State<CreateCategoryView> {
           ]),
           floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                if (await AddCategory()) Navigator.of(context).pop();
+                if (await addCategory()) Navigator.of(context).pop();
               },
               child: const Icon(Icons.save)),
           floatingActionButtonLocation:
@@ -71,7 +71,7 @@ class _CreateCategoryView extends State<CreateCategoryView> {
         ));
   }
 
-  Future<bool> AddCategory() async {
+  Future<bool> addCategory() async {
     //Validates that all mandatory fields are filled
     if (name == '') {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -79,7 +79,7 @@ class _CreateCategoryView extends State<CreateCategoryView> {
               'All fields must be filled ${name == '' ? 'Name' : ''},${emoji == '' ? 'Emoji' : ''}')));
       return false;
     } else {
-      await DatabaseHandler().SaveCategory(CategoryDescriptor(
+      await DatabaseHandler().saveCategory(CategoryDescriptor(
         id: 0,
         emoji: emoji,
         name: name,

@@ -1,14 +1,8 @@
-import 'package:budgetizer/Icons%20Selector/IconListTile.dart';
+import 'package:budgetizer/Icons_Selector/category_utils.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'dart:convert';
-import 'package:flutter/material.dart';
 //Only for dev purposes
-import 'package:faker/faker.dart';
-import 'dart:math';
-import 'package:random_date/random_date.dart';
-import 'dart:io';
 
 class DatabaseHandler {
   static String databaseName = 'my_database.db';
@@ -33,7 +27,7 @@ class DatabaseHandler {
     return _instance;
   }
 
-  Future<void> InitializeDatabaseConnexion() async {
+  Future<void> initializeDatabaseConnexion() async {
     //final file = File(join(await getDatabasesPath(), databaseName));
     //await file.delete();
 
@@ -51,13 +45,10 @@ class DatabaseHandler {
             'CREATE TABLE $expensesTableName (id INTEGER PRIMARY KEY, title TEXT,  categoryID INTEGER, value DOUBLE, date DATE, FOREIGN KEY (categoryID) REFERENCES $categoriesTableName (id)  )');
       },
     );
-
-    print('db init done');
-    await LoadCategories();
+    await loadCategories();
   }
 
   static Future<List<Expenditure>> fetchData() async {
-    print('fetch data');
     // Open the database
     Database db = await openDatabase(
         join(await getDatabasesPath(), databaseName),
@@ -77,8 +68,8 @@ class DatabaseHandler {
           dataBaseId: int.parse(element['id'].toString()),
           title: element['title'].toString(),
           category:
-              MatchCategory(int.parse(element['categoryID'].toString())) ??
-                  CategoryDescriptor.Error(),
+              matchCategory(int.parse(element['categoryID'].toString())) ??
+                  CategoryDescriptor.error(),
           value: double.parse(element['value'].toString()),
           date: DateTime.parse(element['date'].toString())));
     }
@@ -86,7 +77,7 @@ class DatabaseHandler {
     return expendituresList;
   }
 
-  Future<void> InsertData(Expenditure expenditure) async {
+  Future<void> insertData(Expenditure expenditure) async {
     Map<String, dynamic> mapToInsert = {
       'title': expenditure.title,
       'categoryID': expenditure.category.id,
@@ -96,7 +87,7 @@ class DatabaseHandler {
     await db.insert(expensesTableName, mapToInsert);
   }
 
-  Future<void> UpdateData(Expenditure expenditure) async {
+  Future<void> updateData(Expenditure expenditure) async {
     Map<String, dynamic> mapToInsert = {
       'title': expenditure.title,
       'categoryID': expenditure.category.id,
@@ -106,31 +97,30 @@ class DatabaseHandler {
     if (expenditure.dataBaseId == -1) {
       //No expenses to modify in database
       //Insert a new expense
-      await InsertData(expenditure);
+      await insertData(expenditure);
     } else {
       await db.update(expensesTableName, mapToInsert,
           where: 'id = ?', whereArgs: [expenditure.dataBaseId]);
     }
   }
 
-  Future<void> DeleteExpense(Expenditure exp) async {
+  Future<void> deleteExpense(Expenditure exp) async {
     expendituresList.remove(exp);
     int id = exp.dataBaseId;
     await db.delete(expensesTableName, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<void> RegenerateDatabase() async {
+  Future<void> regenerateDatabase() async {
     db.delete(expensesTableName, where: null);
     expendituresList.clear();
   }
 
-  Future<void> DeleteCategories() async {
+  Future<void> deleteCategories() async {
     db.delete(categoriesTableName, where: null);
-    final file = File(join(await getDatabasesPath(), categoriesSaveFileName));
     categoriesList.clear();
   }
 
-  Future<void> DeleteCategory(CategoryDescriptor category) async {
+  Future<void> deleteCategory(CategoryDescriptor category) async {
     categoriesList.remove(category);
     int categoryID = category.id;
     await db
@@ -139,11 +129,9 @@ class DatabaseHandler {
         where: 'categoryID = ?', whereArgs: [categoryID]);
   }
 
-  Future<void> SaveCategory(CategoryDescriptor category) async {
-    print(category);
+  Future<void> saveCategory(CategoryDescriptor category) async {
     categoriesList.add(category);
     Map<String, dynamic> mapToInsert = {};
-    print('Category saved : ${category}');
     mapToInsert['name'] = category.name;
     mapToInsert['descriptors'] = category.descriptors.join('-');
     mapToInsert['icon'] = category.emoji;
@@ -151,7 +139,7 @@ class DatabaseHandler {
     categoriesList.last.id = await db.insert(categoriesTableName, mapToInsert);
   }
 
-  Future<void> LoadCategories() async {
+  Future<void> loadCategories() async {
     // Read the data from the database
     var data = await db.query(categoriesTableName);
 
@@ -166,17 +154,18 @@ class DatabaseHandler {
     }
   }
 
-  static CategoryDescriptor? MatchCategory(int id) {
+  static CategoryDescriptor? matchCategory(int id) {
     for (CategoryDescriptor category in categoriesList) {
       if (category.id == id) {
         return category;
       } else if (category.id == -1) {
-        return CategoryDescriptor.Error();
+        return CategoryDescriptor.error();
       }
     }
+    return null; //Should go here only if categoriesList is empty
   }
 
-  static int CountExpensesInCategory(CategoryDescriptor category) {
+  static int countExpensesInCategory(CategoryDescriptor category) {
     return expendituresList
         .where((element) => element.category.id == category.id)
         .length;

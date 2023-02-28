@@ -1,4 +1,4 @@
-import 'package:budgetizer/Icons%20Selector/IconListTile.dart';
+import 'package:budgetizer/Icons_Selector/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 
 class Expenditure {
@@ -13,16 +13,16 @@ class Expenditure {
       required this.value,
       required this.date,
       required this.dataBaseId});
-  Expenditure.Copy(Expenditure exp) {
-    this.category = exp.category;
-    this.value = exp.value;
-    this.date = exp.date;
-    this.title = exp.title;
-    this.dataBaseId = exp.dataBaseId;
+  Expenditure.copy(Expenditure exp) {
+    category = exp.category;
+    value = exp.value;
+    date = exp.date;
+    title = exp.title;
+    dataBaseId = exp.dataBaseId;
   }
-  Expenditure.Error() {
+  Expenditure.error() {
     title = '';
-    category = CategoryDescriptor.Error();
+    category = CategoryDescriptor.error();
     value = double.nan;
     date = DatabaseHandler.defaultDate;
     dataBaseId = -1;

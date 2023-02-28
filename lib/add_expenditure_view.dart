@@ -1,4 +1,4 @@
-import 'package:budgetizer/Icons%20Selector/IconListTile.dart';
+import 'package:budgetizer/Icons_Selector/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:budgetizer/home.dart';
@@ -11,10 +11,10 @@ import 'package:searchable_listview/searchable_listview.dart';
 class AddExpenditureView extends StatefulWidget {
   AddExpenditureView({super.key, Expenditure? expenditure}) {
     if (expenditure == null) {
-      this.expenditure = Expenditure.Error();
+      this.expenditure = Expenditure.error();
       isModifying = false;
     } else {
-      this.expenditure = Expenditure.Copy(expenditure);
+      this.expenditure = Expenditure.copy(expenditure);
       isModifying = true;
     }
   }
@@ -68,7 +68,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
       },
       validator: (String? value) {
         return (value != null &&
-                value.contains(RegExp('[a-zA-Z&é\"\'()-è`_\\ç^à@\[\]=+\{\}]+')))
+                value.contains(RegExp('[a-zA-Z&é"\'()-è`_\\ç^à@[]=+{}]+')))
             ? 'Use only numbers'
             : null;
       },
@@ -135,7 +135,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
 
   @override
   Widget build(BuildContext context) {
-    DatabaseHandler().LoadCategories();
+    DatabaseHandler().loadCategories();
     FocusManager.instance.primaryFocus?.unfocus();
     return GestureDetector(
         onTap: () {
@@ -208,7 +208,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           ]),
           floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                bool added = await AddExpenditureToDatabase();
+                bool added = await addExpenditureToDatabase();
                 if (added) {
                   setState(() {
                     Navigator.of(context).pop();
@@ -222,23 +222,22 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   }
 
   refresh() async {
-    print('refresh');
-    await DatabaseHandler().LoadCategories();
+    await DatabaseHandler().loadCategories();
     setState(() {});
   }
 
-  Future<bool> AddExpenditureToDatabase() async {
+  Future<bool> addExpenditureToDatabase() async {
     //Validates that all mandatory fields are filled
     if (widget.expenditure.title == '' ||
         widget.expenditure.value == 0.0 ||
         widget.expenditure.date == DatabaseHandler.defaultDate ||
-        widget.expenditure.category == CategoryDescriptor.Error()) {
+        widget.expenditure.category == CategoryDescriptor.error()) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              'All fields must be filled ${widget.expenditure.title == '' ? 'Title' : ''} ${widget.expenditure.category == CategoryDescriptor.Error() ? 'Category' : ''} ${widget.expenditure.value == 0.0 ? 'Amount' : ''} ${widget.expenditure.date == DatabaseHandler.defaultDate ? 'Date' : ''}')));
+              'All fields must be filled ${widget.expenditure.title == '' ? 'Title' : ''} ${widget.expenditure.category == CategoryDescriptor.error() ? 'Category' : ''} ${widget.expenditure.value == 0.0 ? 'Amount' : ''} ${widget.expenditure.date == DatabaseHandler.defaultDate ? 'Date' : ''}')));
       return false;
     } else {
-      await DatabaseHandler().UpdateData(widget.expenditure);
+      await DatabaseHandler().updateData(widget.expenditure);
     }
     return true;
   }

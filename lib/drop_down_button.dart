@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+
 class MyDropdownButton extends StatefulWidget {
-  List<String> list = <String>['Eur', '\$US'];
+  final List<String> list = <String>['Eur', '\$US'];
   MyDropdownButton({super.key, required list});
 
   @override
-  State<MyDropdownButton> createState() => _MyDropdownButtonState(list : list);
+  State<MyDropdownButton> createState() => _MyDropdownButtonState();
 }
 
 class _MyDropdownButtonState extends State<MyDropdownButton> {
-  List<String> list = <String>['Eur', '\$US'];
   String dropdownValue = 'Eur';
-  _MyDropdownButtonState({required list}){
-    dropdownValue = list.first;
+  _MyDropdownButtonState() {
+    dropdownValue = widget.list.first;
   }
 
   @override
@@ -31,7 +31,7 @@ class _MyDropdownButtonState extends State<MyDropdownButton> {
           dropdownValue = value!;
         });
       },
-      items: list.map<DropdownMenuItem<String>>((String value) {
+      items: widget.list.map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),
