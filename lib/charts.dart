@@ -4,6 +4,7 @@ import 'package:budgetizer/expenditure.dart';
 import 'package:budgetizer/indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CategoryPie extends StatefulWidget {
   late PieType pieType;
@@ -294,7 +295,9 @@ class PieChart2State extends State<CategoryPie> {
     return List.generate(data.length, (index) {
       return ListTile(
           leading: Text(data.keys.elementAt(index).emoji),
-          title: Text(data.keys.elementAt(index).name),
+          title: Text(data.keys.elementAt(index).name == "error"
+              ? AppLocalizations.of(context)!.noCategoryName
+              : data.keys.elementAt(index).name),
           trailing: Text(
               '${(data.values.elementAt(index) * totalValueDisplayed / 100).toStringAsFixed(2)}€'));
     });

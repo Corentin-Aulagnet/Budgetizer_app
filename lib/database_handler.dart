@@ -2,6 +2,7 @@ import 'package:budgetizer/Icons_Selector/category_utils.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:budgetizer/home.dart';
 //Only for dev purposes
 
 class DatabaseHandler {

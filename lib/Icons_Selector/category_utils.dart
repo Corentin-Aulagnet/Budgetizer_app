@@ -1,10 +1,11 @@
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CategoryDescriptor {
   late String emoji;
-  late String name; //used in hash
-  late List<String> descriptors; //used in hash
+  late String name;
+  late List<String> descriptors;
   late int id;
 
   CategoryDescriptor({
@@ -15,14 +16,14 @@ class CategoryDescriptor {
   });
   CategoryDescriptor.error() {
     id = -1;
-    name = "No category";
+    name = "error";
     descriptors = [""];
     emoji = '\u26A0';
   }
 
   @override
   String toString() {
-    return '{id: ${id}, emoji : $emoji, name : $name, desc : ${descriptors.join('-')}}';
+    return '{id: $id, emoji : $emoji, name : $name, desc : ${descriptors.join('-')}}';
   }
 
   String display() {
@@ -99,10 +100,14 @@ class CategoryItem extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(
-                                "Do you really want to delete the category ${category.name}"),
-                            Text(
-                                "It is used by ${DatabaseHandler.countExpensesInCategory(category)} expenses in the database")
+                            Text(AppLocalizations.of(context)!
+                                .categoryDeleteConfirmationMessage(
+                                    category.name)),
+                            Text(AppLocalizations.of(context)!
+                                .categoryDeleteConfimationMessageUses(
+                                    DatabaseHandler.countExpensesInCategory(
+                                            category)
+                                        .toString()))
                           ],
                         ),
                         actions: <Widget>[

@@ -1,0 +1,28 @@
+{
+    "welcomeMessage": "Welcome to LedgerStats!",
+    "@welcomeMessage": {
+    "description": "The welcome message of the app"
+  },
+
+  "noCategoryName": "No Category",
+  "categoryDeleteConfirmationMessage":"Do you really want to delete the category {name}",
+  "@categoryDeleteConfirmationMessage": {
+    "description": "A message with a single parameter",
+    "placeholders": {
+      "name": {
+        "type": "String",
+        "example": "Food"
+      }
+    }
+  },
+  "categoryDeleteConfimationMessageUses": "It is used by {number} expenses in the database",
+  "@categoryDeleteConfimationMessageUses": {
+    "description": "A message with a single parameter",
+    "placeholders": {
+      "number": {
+        "type": "String",
+        "example": "12"
+      }
+    }
+  }
+}

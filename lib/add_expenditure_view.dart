@@ -7,6 +7,7 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart';
 import 'package:budgetizer/create_category_view.dart';
 import 'package:searchable_listview/searchable_listview.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddExpenditureView extends StatefulWidget {
   AddExpenditureView({super.key, Expenditure? expenditure}) {
@@ -89,7 +90,9 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
             ],
         filter: (value) => DatabaseHandler.categoriesList
             .where(
-              (element) => element.name.toLowerCase().contains(value),
+              (element) => element.name == "error"
+                  ? AppLocalizations.of(context)!.noCategoryName.contains(value)
+                  : element.name.toLowerCase().contains(value),
             )
             .toList(),
         builder: (CategoryDescriptor category) {

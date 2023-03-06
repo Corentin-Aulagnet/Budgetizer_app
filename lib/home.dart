@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:budgetizer/options_view.dart';
 import 'expenditures_list_view.dart';
 import 'add_expenditure_view.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 const int primaryColor = 0xffed4423;
 const int secondaryColor = 0xffcccccc;
@@ -21,15 +22,14 @@ Map<int, Color> primaryColorSwatch = {
 
 class Home extends StatelessWidget {
   Home({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return const HomeWidget();
+    return HomeWidget();
   }
 }
 
 class HomeWidget extends StatefulWidget {
-  const HomeWidget({super.key});
+  HomeWidget({super.key});
   @override
   State<HomeWidget> createState() => _HomeWidgetState();
 }
@@ -40,55 +40,53 @@ class _HomeWidgetState extends State<HomeWidget> {
     return MaterialApp(
       theme: ThemeData(
           primarySwatch: MaterialColor(primaryColor, primaryColorSwatch)),
-      title: 'Welcome to LedgerStats',
-      home: Builder(
-        builder: (context) => DefaultTabController(
-            length: 2,
-            child: Scaffold(
-              floatingActionButtonLocation:
-                  FloatingActionButtonLocation.centerDocked,
-              bottomNavigationBar: const BottomAppBar(
-                  shape: CircularNotchedRectangle(),
-                  color: Color(primaryColor),
-                  child: TabBar(tabs: [
-                    Tab(icon: Icon(Icons.format_list_bulleted_rounded)),
-                    Tab(icon: Icon(Icons.auto_graph)),
-                  ])),
-              appBar: AppBar(
-                  title: const Text('Welcome to Flutter'),
-                  actions: <Widget>[
-                    IconButton(
-                      icon: const Icon(Icons.settings),
-                      tooltip: 'Options',
-                      onPressed: () {
-                        Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => OptionsView()))
-                            .then((_) => setState(() {}));
-                      },
-                    )
-                  ]),
-              floatingActionButton: FloatingActionButton(
-                onPressed: () {
-                  // Add your onPressed code here!
-                  Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AddExpenditureView()))
-                      .then((_) => setState(() {}));
-                },
-                backgroundColor: const Color(secondaryColor),
-                child: const Icon(Icons.add),
-              ),
-              body: TabBarView(
-                children: [
-                  ExpendituresListView(),
-                  StatisticsView(),
-                ],
-              ),
-            )),
-      ),
+      title: AppLocalizations.of(context)!.welcomeMessage,
+      home: DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            bottomNavigationBar: const BottomAppBar(
+                shape: CircularNotchedRectangle(),
+                color: Color(primaryColor),
+                child: TabBar(tabs: [
+                  Tab(icon: Icon(Icons.format_list_bulleted_rounded)),
+                  Tab(icon: Icon(Icons.auto_graph)),
+                ])),
+            appBar: AppBar(
+                title: Text(AppLocalizations.of(context)!.welcomeMessage),
+                actions: <Widget>[
+                  IconButton(
+                    icon: const Icon(Icons.settings),
+                    tooltip: 'Options',
+                    onPressed: () {
+                      Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => OptionsView()))
+                          .then((_) => setState(() {}));
+                    },
+                  )
+                ]),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                // Add your onPressed code here!
+                Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddExpenditureView()))
+                    .then((_) => setState(() {}));
+              },
+              backgroundColor: const Color(secondaryColor),
+              child: const Icon(Icons.add),
+            ),
+            body: TabBarView(
+              children: [
+                Expenditures(),
+                StatisticsView(),
+              ],
+            ),
+          )),
     );
   }
 }
