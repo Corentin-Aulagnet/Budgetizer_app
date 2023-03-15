@@ -4,18 +4,23 @@ import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:budgetizer/home.dart';
 
-class _ExpendituresState extends State<Expenditures>
-    with AutomaticKeepAliveClientMixin<Expenditures> {
+class _ExpendituresState extends State<Expenditures> {
   late Future<List<Expenditure>> _dataFuture = DatabaseHandler.fetchData();
   @override
-  bool get wantKeepAlive => true;
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return RefreshIndicator(
         onRefresh: refreshView,
         child: Scaffold(
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            floatingActionButton:
+                Home.addExpenditureFloatingActionButton(context),
+            drawer: Home.appNavigationDrawer(context),
+            appBar: AppBar(
+              title: Text(AppLocalizations.of(context)!.welcomeMessage),
+            ),
             key: UniqueKey(),
             body: FutureBuilder<List<Expenditure>>(
               future: _dataFuture,
@@ -28,12 +33,13 @@ class _ExpendituresState extends State<Expenditures>
                       Expenditure row =
                           snapshot.data?[index] ?? Expenditure.error();
                       return ListTile(
-                        title: Text('${row.title} | ${row.category.name}',
+                        title: Text(
+                            '${row.title} | ${row.category.getName(context)}',
                             style:
                                 const TextStyle(fontWeight: FontWeight.bold)),
                         trailing: Text(row.category.emoji),
                         subtitle: Text(
-                            '${DateFormat.yMd('fr_FR').format(row.date)} ${row.value.toString()}€'),
+                            '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(row.date)} ${row.value.toString()}€'),
                         onTap: () {
                           Navigator.push(
                             context,

@@ -7,18 +7,21 @@ class CategoryDescriptor {
   late String name;
   late List<String> descriptors;
   late int id;
-
+  late bool isError;
   CategoryDescriptor({
     required this.name,
     required this.emoji,
     required this.descriptors,
     required this.id,
-  });
+  }) {
+    isError = false;
+  }
   CategoryDescriptor.error() {
     id = -1;
     name = "error";
     descriptors = [""];
     emoji = '\u26A0';
+    isError = true;
   }
 
   @override
@@ -28,6 +31,10 @@ class CategoryDescriptor {
 
   String display() {
     return name;
+  }
+
+  String getName(BuildContext context) {
+    return isError ? AppLocalizations.of(context)!.noCategoryName : name;
   }
 }
 

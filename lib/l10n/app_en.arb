@@ -3,7 +3,14 @@
     "@welcomeMessage": {
     "description": "The welcome message of the app"
   },
-
+  "addExpenseTitle" : "Add a new Expense",
+  "@addExpenseTitle": {
+    "description": "The title of the view to add an expense to the database"
+  },
+  "modifyExpenseTitle" : "Modify",
+  "@modifyExpenseTitle": {
+    "description": "The title of the view to modify an expense in the database"
+  },
   "noCategoryName": "No Category",
   "categoryDeleteConfirmationMessage":"Do you really want to delete the category {name}",
   "@categoryDeleteConfirmationMessage": {

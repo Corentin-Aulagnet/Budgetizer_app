@@ -29,7 +29,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-    
+  flutter_localizations:
+    sdk: flutter
 
 
 
@@ -41,13 +42,15 @@ dependencies:
   path: ^1.8.2
   faker: ^2.1.0
   random_date: ^0.0.7
-  intl: ^0.18.0
+  intl: any
   datetime_picker_formfield: ^2.0.1
   fl_chart: ^0.61.0
   searchable_listview: ^2.2.1
   material_design_icons_flutter : ^6.0.7096
   font_awesome_flutter: ^10.4.0
-
+  bloc: ^8.1.0
+  flutter_bloc: ^8.1.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -64,7 +67,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  generate : true
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

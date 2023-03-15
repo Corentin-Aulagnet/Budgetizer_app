@@ -43,8 +43,10 @@ class PieChart2State extends State<CategoryPie> {
   DateTime mmyy = DateTime(2021, 12);
   Set<String> months = {};
   Set<String> years = {};
-  String month = DatabaseHandler.expendituresList.first.date.month.toString();
-  String year = DatabaseHandler.expendituresList.first.date.year.toString();
+  String monthOnGraph =
+      DatabaseHandler.expendituresList.first.date.month.toString();
+  String yearOnGraph =
+      DatabaseHandler.expendituresList.first.date.year.toString();
 
   double totalValueDisplayed = 0.0;
 
@@ -119,7 +121,7 @@ class PieChart2State extends State<CategoryPie> {
           children: [
             Indicator(
               color: colors[index],
-              text: data.keys.elementAt(index).name,
+              text: data.keys.elementAt(index).getName(context),
               isSquare: true,
             ),
             Text(data.keys.elementAt(index).emoji)
@@ -141,7 +143,7 @@ class PieChart2State extends State<CategoryPie> {
       return PieChartSectionData(
           color: colors[i],
           value: data.values.elementAt(i),
-          title: data.keys.elementAt(i).name,
+          title: data.keys.elementAt(i).getName(context),
           radius: radius,
           titleStyle: TextStyle(
             fontSize: fontSize,
@@ -175,7 +177,7 @@ class PieChart2State extends State<CategoryPie> {
     Map<CategoryDescriptor, double> dataToPlotGroupedBycategories = {};
     totalValueDisplayed = 0.0;
     //Filters by date
-    mmyy = DateTime(int.parse(year), int.parse(month));
+    mmyy = DateTime(int.parse(yearOnGraph), int.parse(monthOnGraph));
     for (var element in results) {
       DateTime date = element.date;
       switch (type) {
@@ -251,23 +253,23 @@ class PieChart2State extends State<CategoryPie> {
     if (type == PieType.monthly) {
       return <Widget>[
         DropdownButton<String>(
-          value: month,
+          value: monthOnGraph,
           onChanged: (String? value) {
             // This is called when the user selects an item.
             setState(() {
               Scaffold.of(context).setState(() {});
-              month = value!; //Code to run
+              monthOnGraph = value!; //Code to run
             });
           },
           items: getMonths(),
         ),
         DropdownButton<String>(
-          value: year,
+          value: yearOnGraph,
           onChanged: (String? value) {
             // This is called when the user selects an item.
             setState(() {
               Scaffold.of(context).setState(() {});
-              year = value!; //Code to run
+              yearOnGraph = value!; //Code to run
             });
           },
           items: getYears(),
@@ -281,7 +283,7 @@ class PieChart2State extends State<CategoryPie> {
             // This is called when the user selects an item.
             setState(() {
               Scaffold.of(context).setState(() {});
-              year = value!; //Code to run
+              yearOnGraph = value!; //Code to run
             });
           },
           items: getYears(),
@@ -295,9 +297,7 @@ class PieChart2State extends State<CategoryPie> {
     return List.generate(data.length, (index) {
       return ListTile(
           leading: Text(data.keys.elementAt(index).emoji),
-          title: Text(data.keys.elementAt(index).name == "error"
-              ? AppLocalizations.of(context)!.noCategoryName
-              : data.keys.elementAt(index).name),
+          title: Text(data.keys.elementAt(index).getName(context)),
           trailing: Text(
               '${(data.values.elementAt(index) * totalValueDisplayed / 100).toStringAsFixed(2)}€'));
     });

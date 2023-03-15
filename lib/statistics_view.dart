@@ -1,6 +1,8 @@
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/charts.dart' as pie_charts;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:budgetizer/home.dart';
 
 class StatisticsView extends StatelessWidget {
   StatisticsView({super.key});
@@ -26,26 +28,32 @@ class _StatisticsState extends State<Statistics> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: Home.addExpenditureFloatingActionButton(context),
+        drawer: Home.appNavigationDrawer(context),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.welcomeMessage),
+        ),
         body: Column(children: <Widget>[
-      DropdownButton<String>(
-        value: graphToDisplay,
-        onChanged: (String? value) {
-          // This is called when the user selects an item.
-          setState(() {
-            Scaffold.of(context).setState(() {});
-            graphToDisplay = value!; //Code to run
-          });
-        },
-        items: choices.map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-              value: value,
-              child: Text(
-                value,
-              ));
-        }).toList(),
-      ),
-      getChart(),
-    ]));
+          DropdownButton<String>(
+            value: graphToDisplay,
+            onChanged: (String? value) {
+              // This is called when the user selects an item.
+              setState(() {
+                Scaffold.of(context).setState(() {});
+                graphToDisplay = value!; //Code to run
+              });
+            },
+            items: choices.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(
+                    value,
+                  ));
+            }).toList(),
+          ),
+          getChart(),
+        ]));
   }
 
   Widget getChart() {

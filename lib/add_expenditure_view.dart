@@ -90,13 +90,12 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
             ],
         filter: (value) => DatabaseHandler.categoriesList
             .where(
-              (element) => element.name == "error"
-                  ? AppLocalizations.of(context)!.noCategoryName.contains(value)
-                  : element.name.toLowerCase().contains(value),
+              (element) =>
+                  element.getName(context).toLowerCase().contains(value),
             )
             .toList(),
         builder: (CategoryDescriptor category) {
-          if (category.name == "Create a category") {
+          if (category.getName(context) == "Create a category") {
             return CategoryItem(
               category: category,
               notifyParent: () {},
@@ -114,14 +113,14 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           fillColor: Colors.white,
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(
-              color: Color(primaryColor),
+              color: primaryColor,
               width: 1.0,
             ),
             borderRadius: BorderRadius.circular(10.0),
           ),
         ),
         onItemSelected: (CategoryDescriptor category) {
-          if (category.name == "Create a category") {
+          if (category.getName(context) == "Create a category") {
             //Push the view to create a category
             Navigator.push(
               context,
@@ -147,8 +146,9 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         },
         child: Scaffold(
           appBar: AppBar(
-            title:
-                Text(widget.isModifying ? 'Modify' : 'Add a new Expenditure'),
+            title: Text(widget.isModifying
+                ? AppLocalizations.of(context)!.modifyExpenseTitle
+                : AppLocalizations.of(context)!.addExpenseTitle),
             leading: const BackButton(),
           ),
           body: Column(children: <Widget>[
@@ -190,7 +190,8 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
               Expanded(
                 child: DateTimeField(
                   initialValue: widget.expenditure.date,
-                  format: DateFormat.yMd('fr_Fr'),
+                  format: DateFormat.yMd(
+                      Localizations.localeOf(context).languageCode),
                   onShowPicker: (context, currentValue) {
                     return showDatePicker(
                         context: context,

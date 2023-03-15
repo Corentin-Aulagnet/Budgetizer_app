@@ -1,6 +1,8 @@
 {
     "welcomeMessage": "Bienvenue dans LedgerStats !",
-  "noCategoryName": "Pas de Categorie",
-  "categoryDeleteConfirmationMessage":"Voulez-vous vraiment supprimer la catégorie ${name}",
-  "categoryDeleteConfimationMessageUses": "Elle est utilisée par {number} dépenses dans la base de données"
+    "addExpenseTitle" : "Ajouter une dépense",
+    "modifyExpenseTitle" : "Modifier",
+    "noCategoryName": "Pas de Categorie",
+    "categoryDeleteConfirmationMessage":"Voulez-vous vraiment supprimer la catégorie ${name}",
+    "categoryDeleteConfimationMessageUses": "Elle est utilisée par {number} dépenses dans la base de données"
 }
