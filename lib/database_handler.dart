@@ -47,6 +47,7 @@ class DatabaseHandler {
       },
     );
     await loadCategories();
+    await fetchData();
   }
 
   static Future<List<Expenditure>> fetchData() async {

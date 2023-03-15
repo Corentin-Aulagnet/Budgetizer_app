@@ -1,4 +1,7 @@
+import 'package:budgetizer/charts.dart';
+import 'package:budgetizer/statistics_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'add_expenditure_view.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -69,8 +72,7 @@ class Home extends StatefulWidget {
       onPressed: () {
         // Add your onPressed code here!
         Navigator.push(context,
-                MaterialPageRoute(builder: (context) => AddExpenditureView()))
-            .then((_) => context.widget.setState(() {}));
+            MaterialPageRoute(builder: (context) => AddExpenditureView()));
       },
       backgroundColor: secondaryColor,
       child: const Icon(Icons.add),
@@ -85,13 +87,29 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        drawer: Home.appNavigationDrawer(context),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.welcomeMessage),
-        ),
-        floatingActionButton: Home.addExpenditureFloatingActionButton(context),
-        body: const Text("Main page"));
+    return BlocProvider(
+        create: (_) => ChartBloc.unique(
+            chartType: PieType.monthly,
+            month: DateTime.now().month.toString(),
+            year: DateTime.now().year.toString()),
+        child: Scaffold(
+            drawer: Home.appNavigationDrawer(context),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            appBar: AppBar(
+              title: Text(AppLocalizations.of(context)!.welcomeMessage),
+            ),
+            floatingActionButton:
+                Home.addExpenditureFloatingActionButton(context),
+            body: Column(
+              children: [
+                Center(
+                    child: Text(
+                  "Votre mois de ${DateTime.now().month.toString()} ${DateTime.now().year.toString()}",
+                  style: const TextStyle(
+                      fontSize: 30, fontWeight: FontWeight.bold),
+                )),
+                CategoryPie()
+              ],
+            )));
   }
 }

@@ -5,10 +5,11 @@ import 'package:budgetizer/indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:budgetizer/statistics_view.dart';
 
 class CategoryPie extends StatefulWidget {
-  late PieType pieType;
-  CategoryPie({super.key, required this.pieType});
+  CategoryPie({super.key});
 
   @override
   State<StatefulWidget> createState() => PieChart2State();
@@ -16,20 +17,6 @@ class CategoryPie extends StatefulWidget {
 
 enum PieType { monthly, yearly }
 
-Map<String, String> int2TextMonths = {
-  '1': 'jan',
-  '2': 'feb',
-  '3': 'mar',
-  '4': 'apr',
-  '5': 'may',
-  '6': 'jun',
-  '7': 'jul',
-  '8': 'aug',
-  '9': 'sep',
-  '10': 'oct',
-  '11': 'nov',
-  '12': 'dec'
-};
 List<Color> colors = <Color>[
   const Color(0xff0293ee),
   const Color(0xfff8b250),
@@ -39,10 +26,9 @@ List<Color> colors = <Color>[
 
 class PieChart2State extends State<CategoryPie> {
   int touchedIndex = -1;
-  late PieType type = widget.pieType;
+  late PieType type;
   DateTime mmyy = DateTime(2021, 12);
-  Set<String> months = {};
-  Set<String> years = {};
+
   String monthOnGraph =
       DatabaseHandler.expendituresList.first.date.month.toString();
   String yearOnGraph =
@@ -52,65 +38,62 @@ class PieChart2State extends State<CategoryPie> {
 
   @override
   Widget build(BuildContext context) {
-    type = widget.pieType;
-    return Expanded(
-        child: Column(children: [
-      Card(
-          color: Colors.white,
-          child: Column(
-            children: [
-              Row(children: <Widget>[
-                const SizedBox(
-                  width: 28,
-                ),
-                Row(children: showingDropDownButtons())
-              ]),
-              Row(
-                children: <Widget>[
-                  const SizedBox(
-                    height: 18,
-                  ),
-                  Expanded(
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: PieChart(
-                        PieChartData(
-                          pieTouchData: PieTouchData(
-                            touchCallback:
-                                (FlTouchEvent event, pieTouchResponse) {
-                              setState(() {
-                                if (!event.isInterestedForInteractions ||
-                                    pieTouchResponse == null ||
-                                    pieTouchResponse.touchedSection == null) {
-                                  touchedIndex = -1;
-                                  return;
-                                }
-                                touchedIndex = pieTouchResponse
-                                    .touchedSection!.touchedSectionIndex;
-                              });
-                            },
+    return BlocBuilder<ChartBloc, ChartState>(builder: (_, chartState) {
+      type = chartState.chartType;
+      monthOnGraph = chartState.month.toString();
+      yearOnGraph = chartState.year.toString();
+      return Column(children: [
+        Card(
+            color: Colors.white,
+            child: Column(
+              children: [
+                Row(
+                  children: <Widget>[
+                    const SizedBox(
+                      height: 18,
+                    ),
+                    Expanded(
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: PieChart(
+                          PieChartData(
+                            pieTouchData: PieTouchData(
+                              touchCallback:
+                                  (FlTouchEvent event, pieTouchResponse) {
+                                setState(() {
+                                  if (!event.isInterestedForInteractions ||
+                                      pieTouchResponse == null ||
+                                      pieTouchResponse.touchedSection == null) {
+                                    touchedIndex = -1;
+                                    return;
+                                  }
+                                  touchedIndex = pieTouchResponse
+                                      .touchedSection!.touchedSectionIndex;
+                                });
+                              },
+                            ),
+                            borderData: FlBorderData(
+                              show: false,
+                            ),
+                            sectionsSpace: 0,
+                            centerSpaceRadius: 80,
+                            sections: showingSections(),
                           ),
-                          borderData: FlBorderData(
-                            show: false,
-                          ),
-                          sectionsSpace: 0,
-                          centerSpaceRadius: 80,
-                          sections: showingSections(),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: showingIndicators(),
-              ),
-            ],
-          )),
-      /*Flexible(child: ListView(children: showingListTiles()))*/
-    ]));
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: showingIndicators(),
+                ),
+              ],
+            )),
+        /*Flexible(child: ListView(children: showingListTiles()))*/
+      ]);
+    });
   }
 
   List<Widget> showingIndicators() {
@@ -217,79 +200,6 @@ class PieChart2State extends State<CategoryPie> {
       dataToPlotGroupedBycategories[element] = tmpValue;
     }
     return dataToPlotGroupedBycategories;
-  }
-
-  List<DropdownMenuItem<String>> getMonths() {
-    List<Expenditure> results = DatabaseHandler.expendituresList;
-    for (var element in results) {
-      DateTime date = element.date;
-      months.add(date.month.toString());
-    }
-    return List.generate(months.length, (index) {
-      return DropdownMenuItem<String>(
-          value: months.elementAt(index),
-          child: Text(
-            int2TextMonths[months.elementAt(index)]!,
-          ));
-    });
-  }
-
-  List<DropdownMenuItem<String>> getYears() {
-    List<Expenditure> results = DatabaseHandler.expendituresList;
-    for (var element in results) {
-      DateTime date = element.date;
-      years.add(date.year.toString());
-    }
-    return List.generate(years.length, (index) {
-      return DropdownMenuItem<String>(
-          value: years.elementAt(index),
-          child: Text(
-            years.elementAt(index),
-          ));
-    });
-  }
-
-  List<Widget> showingDropDownButtons() {
-    if (type == PieType.monthly) {
-      return <Widget>[
-        DropdownButton<String>(
-          value: monthOnGraph,
-          onChanged: (String? value) {
-            // This is called when the user selects an item.
-            setState(() {
-              Scaffold.of(context).setState(() {});
-              monthOnGraph = value!; //Code to run
-            });
-          },
-          items: getMonths(),
-        ),
-        DropdownButton<String>(
-          value: yearOnGraph,
-          onChanged: (String? value) {
-            // This is called when the user selects an item.
-            setState(() {
-              Scaffold.of(context).setState(() {});
-              yearOnGraph = value!; //Code to run
-            });
-          },
-          items: getYears(),
-        ),
-      ];
-    } else {
-      return <Widget>[
-        DropdownButton<String>(
-          value: years.first,
-          onChanged: (String? value) {
-            // This is called when the user selects an item.
-            setState(() {
-              Scaffold.of(context).setState(() {});
-              yearOnGraph = value!; //Code to run
-            });
-          },
-          items: getYears(),
-        ),
-      ];
-    }
   }
 
   List<Widget> showingListTiles() {
