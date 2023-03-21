@@ -24,14 +24,14 @@ class _CreateCategoryView extends State<CreateCategoryView> {
         },
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Create a category'),
+            title: const Text('Create a category'), //TODO localization
             leading: const BackButton(),
           ),
           body: Column(children: <Widget>[
             TextFormField(
               decoration: const InputDecoration(
-                hintText: 'category name',
-                labelText: 'Name',
+                hintText: 'category name', //TODO localization
+                labelText: 'Name', //TODO localization
               ),
               onChanged: (String? value) {
                 // This optional block of code can be used to run
@@ -39,7 +39,9 @@ class _CreateCategoryView extends State<CreateCategoryView> {
                 if (value != null) name = value;
               },
               validator: (String? value) {
-                return (value != null) ? 'Do not use the @ char.' : null;
+                return (value != null)
+                    ? 'Do not use the @ char.'
+                    : null; //TODO localization
               },
             ),
             TextFormField(
@@ -56,8 +58,8 @@ class _CreateCategoryView extends State<CreateCategoryView> {
                 if (value != null) emoji = value;
               },
               decoration: const InputDecoration(
-                hintText: 'Select an emoji',
-                labelText: 'Category Emoji',
+                hintText: 'Select an emoji', //TODO localization
+                labelText: 'Category Emoji', //TODO localization
               ),
             ),
           ]),
@@ -76,7 +78,7 @@ class _CreateCategoryView extends State<CreateCategoryView> {
     if (name == '') {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              'All fields must be filled ${name == '' ? 'Name' : ''},${emoji == '' ? 'Emoji' : ''}')));
+              'All fields must be filled ${name == '' ? 'Name' : ''},${emoji == '' ? 'Emoji' : ''}'))); //TODO localization
       return false;
     } else {
       await DatabaseHandler().saveCategory(CategoryDescriptor(

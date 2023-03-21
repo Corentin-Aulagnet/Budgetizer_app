@@ -166,6 +166,7 @@ class TypeDropDownMenu extends StatelessWidget {
 
 class DateDropDownMenu extends StatelessWidget {
   Map<String, String> int2TextMonths = {
+    //TODO localization
     '1': 'jan',
     '2': 'feb',
     '3': 'mar',
@@ -259,7 +260,8 @@ class EmptyDataBaseStatistics extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Text("Nothing to display\n Please add an expenditure in the list"),
+      body: Text(
+          "Nothing to display\n Please add an expenditure in the list"), //TODO localization //TODO polish
     );
   }
 }

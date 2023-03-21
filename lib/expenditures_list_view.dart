@@ -55,7 +55,9 @@ class _ExpendituresState extends State<Expenditures> {
                   return ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        ListTile(title: Text('Error: ${snapshot.error}'))
+                        ListTile(
+                            title: Text(
+                                'Error: ${snapshot.error}')) //TODO localization
                       ]);
                 }
                 return const Center(child: CircularProgressIndicator());

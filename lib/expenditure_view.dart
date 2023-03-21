@@ -25,14 +25,14 @@ class ExpenditureViewState extends State<ExpenditureView> {
               showDialog(
                   context: context,
                   builder: (BuildContext context) => AlertDialog(
-                        title:
-                            Text('Delete Expense ${widget.expenditure.title}'),
+                        title: Text(
+                            'Delete Expense ${widget.expenditure.title}'), //TODO localization
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                                "Do you really want to delete the expense ${widget.expenditure.title}"),
+                                "Do you really want to delete the expense ${widget.expenditure.title}"), //TODO localization
                           ],
                         ),
                         actions: <Widget>[
@@ -43,7 +43,7 @@ class ExpenditureViewState extends State<ExpenditureView> {
                               Navigator.of(context).pop();
                             },
                             child: const Text(
-                              'Delete',
+                              'Delete', //TODO localization
                               style: TextStyle(color: Color(0xffff0000)),
                             ),
                           ),
@@ -82,7 +82,7 @@ class ExpenditureViewState extends State<ExpenditureView> {
         ]),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         appBar: AppBar(
-          title: const Text('View an Expenditure'),
+          title: const Text('View an Expenditure'), //TODO localization
           leading: const BackButton(),
         ),
         body: Column(

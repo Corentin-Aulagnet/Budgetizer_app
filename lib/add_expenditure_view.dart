@@ -50,7 +50,9 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         if (value != null) widget.expenditure.title = value;
       },
       validator: (String? value) {
-        return (value != null) ? 'Do not use the @ char.' : null;
+        return (value != null)
+            ? 'Do not use the @ char.'
+            : null; //TODO localization
       },
     );
   }
@@ -70,7 +72,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
       validator: (String? value) {
         return (value != null &&
                 value.contains(RegExp('[a-zA-Z&é"\'()-è`_\\ç^à@[]=+{}]+')))
-            ? 'Use only numbers'
+            ? 'Use only numbers' //TODO localization
             : null;
       },
     );
@@ -84,7 +86,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
               CategoryDescriptor(
                 id: 0,
                 emoji: '\u2795',
-                name: "Create a category",
+                name: "Create a category", //TODO localization
                 descriptors: [""],
               )
             ],
@@ -96,6 +98,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
             .toList(),
         builder: (CategoryDescriptor category) {
           if (category.getName(context) == "Create a category") {
+            //TODO localization
             return CategoryItem(
               category: category,
               notifyParent: () {},
@@ -109,7 +112,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           }
         },
         inputDecoration: InputDecoration(
-          labelText: "Search Category",
+          labelText: "Search Category", //TODO localization
           fillColor: Colors.white,
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(
@@ -154,7 +157,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           body: Column(children: <Widget>[
             titleFieldForm(),
             Row(children: [
-              const Text("Category Selected"),
+              const Text("Category Selected"), //TODO localization
               Expanded(
                   child: CategoryItem(
                 category: widget.expenditure.category,
@@ -238,7 +241,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         widget.expenditure.category == CategoryDescriptor.error()) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              'All fields must be filled ${widget.expenditure.title == '' ? 'Title' : ''} ${widget.expenditure.category == CategoryDescriptor.error() ? 'Category' : ''} ${widget.expenditure.value == 0.0 ? 'Amount' : ''} ${widget.expenditure.date == DatabaseHandler.defaultDate ? 'Date' : ''}')));
+              'All fields must be filled ${widget.expenditure.title == '' ? 'Title' : ''} ${widget.expenditure.category == CategoryDescriptor.error() ? 'Category' : ''} ${widget.expenditure.value == 0.0 ? 'Amount' : ''} ${widget.expenditure.date == DatabaseHandler.defaultDate ? 'Date' : ''}'))); //TODO localization
       return false;
     } else {
       await DatabaseHandler().updateData(widget.expenditure);

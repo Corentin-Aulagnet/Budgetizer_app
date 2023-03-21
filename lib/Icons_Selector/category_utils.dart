@@ -102,7 +102,8 @@ class CategoryItem extends StatelessWidget {
               showDialog(
                   context: context,
                   builder: (BuildContext context) => AlertDialog(
-                        title: Text('Delete Category ${category.name}'),
+                        title: Text(
+                            'Delete Category ${category.name}'), //TODO localization
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,7 +126,7 @@ class CategoryItem extends StatelessWidget {
                               Navigator.of(context).pop();
                             },
                             child: const Text(
-                              'Delete',
+                              'Delete', //TODO localization
                               style: TextStyle(color: Color(0xffff0000)),
                             ),
                           ),

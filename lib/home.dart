@@ -104,7 +104,7 @@ class _HomeState extends State<Home> {
               children: [
                 Center(
                     child: Text(
-                  "Votre mois de ${DateTime.now().month.toString()} ${DateTime.now().year.toString()}",
+                  "Votre mois de ${DateTime.now().month.toString()} ${DateTime.now().year.toString()}", //TODO localization
                   style: const TextStyle(
                       fontSize: 30, fontWeight: FontWeight.bold),
                 )),
