@@ -1,5 +1,5 @@
 import 'package:budgetizer/charts.dart';
-import 'package:budgetizer/statistics_view.dart';
+import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'add_expenditure_view.dart';
@@ -88,10 +88,10 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-        create: (_) => ChartBloc.unique(
-            chartType: PieType.monthly,
-            month: DateTime.now().month.toString(),
-            year: DateTime.now().year.toString()),
+        create: (_) => PieChartBloc.unique(
+            chartType: ChartsType.monthlyPie,
+            month: [DateTime.now().month.toString()],
+            year: [DateTime.now().year.toString()]),
         child: Scaffold(
             drawer: Home.appNavigationDrawer(context),
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
@@ -108,7 +108,7 @@ class _HomeState extends State<Home> {
                   style: const TextStyle(
                       fontSize: 30, fontWeight: FontWeight.bold),
                 )),
-                CategoryPie()
+                MonthlyPie()
               ],
             )));
   }

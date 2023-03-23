@@ -1,6 +1,6 @@
 import 'package:budgetizer/expenditures_list_view.dart';
 import 'package:budgetizer/options_view.dart';
-import 'package:budgetizer/statistics_view.dart';
+import 'package:budgetizer/Analytics/view/statistics_view.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/home.dart';
 import 'package:budgetizer/database_handler.dart';

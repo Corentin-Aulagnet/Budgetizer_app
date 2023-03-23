@@ -50,12 +50,12 @@ class DatabaseHandler {
     await fetchData();
   }
 
-  static Future<List<Expenditure>> fetchData() async {
+  Future<List<Expenditure>> fetchData() async {
     // Open the database
-    Database db = await openDatabase(
+    /*Database db = await openDatabase(
         join(await getDatabasesPath(), databaseName),
         version: 1);
-
+*/
     // Read the data from the database
 
     var data = await db.query(
@@ -77,6 +77,16 @@ class DatabaseHandler {
     }
     // Return the data
     return expendituresList;
+  }
+
+  Future<List<String>> fetchDates() async {
+    var data = await db.query(expensesTableName,
+        columns: ['date'], orderBy: "date DESC", groupBy: 'date');
+    List<String> dates = List.empty(growable: true);
+    for (var element in data) {
+      dates.add(element['date'].toString());
+    }
+    return dates;
   }
 
   Future<void> insertData(Expenditure expenditure) async {

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:budgetizer/Icons_Selector/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
@@ -6,16 +8,179 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:budgetizer/statistics_view.dart';
+import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
+import 'package:budgetizer/Analytics/view/statistics_view.dart';
 
-class CategoryPie extends StatefulWidget {
-  CategoryPie({super.key});
-
+class YearlyPie extends StatefulWidget {
+  YearlyPie({super.key});
   @override
-  State<StatefulWidget> createState() => PieChart2State();
+  State<StatefulWidget> createState() => YearlyPieState();
 }
 
-enum PieType { monthly, yearly }
+class MonthlyPie extends StatefulWidget {
+  MonthlyPie({super.key});
+  @override
+  State<StatefulWidget> createState() => MonthlyPieState();
+}
+
+class MontlhyBarChart extends StatelessWidget {
+  late List<MonthDisplay> months;
+  final double axisFontSize = 14;
+  double maxY = 0.0;
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<BarChartBloc, BarChartState>(
+      builder: (context, state) {
+        months = state.dates;
+        return Column(children: [
+          Card(
+              child: AspectRatio(
+                  aspectRatio: 1,
+                  child: BarChart(BarChartData(
+                      titlesData: xAxisTitlesData,
+                      barGroups: getData(months),
+                      gridData: FlGridData(drawVerticalLine: false))))),
+        ]);
+      },
+    );
+  }
+
+  Widget getXAxisTitles(double value, TitleMeta meta) {
+    final style = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: axisFontSize,
+    );
+    String text = months[value.toInt()].toString();
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 4,
+      child: Text(
+        text,
+        style: style,
+      ),
+    );
+  }
+
+  List<MonthDisplay> bubbleSort(List<MonthDisplay> list) {
+    for (int i = 0; i < list.length; i++) {
+      for (int j = 0; j < list.length - 1; j++) {
+        if (list[j] > list[j + 1]) {
+          MonthDisplay num = list[j];
+          list[j] = list[j + 1];
+          list[j + 1] = num;
+        }
+      }
+    }
+    return list;
+  }
+
+  Widget getYAxisTitles(double value, TitleMeta meta) {
+    final style = TextStyle(
+      fontWeight: FontWeight.normal,
+      fontSize: axisFontSize,
+    );
+    String text = value == 0.0 ? '' : value.toString();
+    return SideTitleWidget(
+      axisSide: meta.axisSide,
+      space: 4,
+      child: Text(
+        text,
+        style: style,
+      ),
+    );
+  }
+
+  FlTitlesData get xAxisTitlesData => FlTitlesData(
+        show: true,
+        bottomTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            reservedSize: months.isEmpty ? 0 : 30,
+            getTitlesWidget: getXAxisTitles,
+          ),
+        ),
+        leftTitles: AxisTitles(
+          sideTitles: SideTitles(
+            showTitles: true,
+            getTitlesWidget: getYAxisTitles,
+            reservedSize:
+                months.isEmpty ? 0 : (axisFontSize * maxY.toString().length),
+          ),
+        ),
+        topTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+        rightTitles: AxisTitles(
+          sideTitles: SideTitles(showTitles: false),
+        ),
+      );
+  List<BarChartGroupData> getData(List<MonthDisplay> monthsToDisplay) {
+    maxY = 0;
+    //aggregate data per categorie per months
+    Map<String, Map<CategoryDescriptor, double>> data = {};
+    monthsToDisplay = bubbleSort(monthsToDisplay);
+    for (MonthDisplay monthYear in monthsToDisplay) {
+      Map<CategoryDescriptor, double> dataAggregate = getDataByMonth(monthYear);
+      data[monthYear.toString()] = dataAggregate;
+    }
+    List<BarChartGroupData> groups = List.empty(growable: true);
+    for (int monthIndex = 0; monthIndex < data.keys.length; monthIndex++) {
+      //create one BarChartRodStackItem per category in a month
+      List<BarChartRodData> rods = List.empty(growable: true);
+      String monthYear = data.keys.elementAt(monthIndex);
+      double nextFromValue = 0;
+      Map<CategoryDescriptor, double> dataAggregate = data[monthYear]!;
+      List<BarChartRodStackItem> monthRodStackItems =
+          List.empty(growable: true);
+      for (int catIndex = 0; catIndex < dataAggregate.keys.length; catIndex++) {
+        //in a category
+        CategoryDescriptor cat = dataAggregate.keys.elementAt(catIndex);
+        double value = dataAggregate[cat]!;
+        monthRodStackItems.add(BarChartRodStackItem(
+            nextFromValue, nextFromValue + value, colors[catIndex]));
+        nextFromValue += value;
+      }
+      maxY = max(maxY, nextFromValue);
+      //create one BarChartRodData per month
+      rods.add(BarChartRodData(
+          toY: nextFromValue, rodStackItems: monthRodStackItems));
+//create one BarChartGroupData per month
+      groups.add(BarChartGroupData(x: monthIndex, barRods: rods));
+    }
+    return groups;
+  }
+
+  Map<CategoryDescriptor, double> getDataByMonth(MonthDisplay monthYear) {
+    List<Expenditure> results = DatabaseHandler.expendituresList;
+    List<Expenditure> dataToPlot = List.empty(growable: true);
+    Set<CategoryDescriptor> categoriesToPlot = {};
+    Map<CategoryDescriptor, double> dataToPlotGroupedBycategories = {};
+    //Filters by date
+    DateTime mmyy = DateTime(monthYear.y, monthYear.m);
+    for (var element in results) {
+      DateTime date = element.date;
+      if (date.month == mmyy.month && date.year == mmyy.year) {
+        categoriesToPlot.add(element.category);
+        dataToPlot.add(element);
+      }
+    }
+    //Aggregate by categories
+    for (var element in categoriesToPlot) {
+      dataToPlotGroupedBycategories[element] = 0;
+    }
+    for (int i = 0; i < dataToPlot.length; i++) {
+      Expenditure element = dataToPlot[i];
+      dataToPlotGroupedBycategories.update(
+        element.category,
+        (value) => element.value + value,
+        ifAbsent: () => element.value,
+      );
+    }
+    return dataToPlotGroupedBycategories;
+  }
+}
+
+enum ChartsType { monthlyPie, yearlyPie, barChart }
 
 List<Color> colors = <Color>[
   const Color(0xff0293ee),
@@ -24,9 +189,185 @@ List<Color> colors = <Color>[
   const Color(0xff13d38e),
 ];
 
-class PieChart2State extends State<CategoryPie> {
+class YearlyPieState extends State<YearlyPie> {
   int touchedIndex = -1;
-  late PieType type;
+  late ChartsType type;
+  DateTime yy = DateTime(2021);
+
+  String yearOnGraph =
+      DatabaseHandler.expendituresList.first.date.year.toString();
+
+  double totalValueDisplayed = 0.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<PieChartBloc, PieChartState>(builder: (_, chartState) {
+      type = chartState.chartType;
+      yearOnGraph = chartState.year.first.toString();
+      return Column(children: [
+        Card(
+            color: Colors.white,
+            child: Column(
+              children: [
+                Row(
+                  children: <Widget>[
+                    const SizedBox(
+                      height: 18,
+                    ),
+                    Expanded(
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: PieChart(
+                          PieChartData(
+                            pieTouchData: PieTouchData(
+                              touchCallback:
+                                  (FlTouchEvent event, pieTouchResponse) {
+                                setState(() {
+                                  if (!event.isInterestedForInteractions ||
+                                      pieTouchResponse == null ||
+                                      pieTouchResponse.touchedSection == null) {
+                                    touchedIndex = -1;
+                                    return;
+                                  }
+                                  touchedIndex = pieTouchResponse
+                                      .touchedSection!.touchedSectionIndex;
+                                });
+                              },
+                            ),
+                            borderData: FlBorderData(
+                              show: false,
+                            ),
+                            sectionsSpace: 0,
+                            centerSpaceRadius: 80,
+                            sections: showingSections(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: showingIndicators(),
+                ),
+              ],
+            )),
+        /*Flexible(child: ListView(children: showingListTiles()))*/
+      ]);
+    });
+  }
+
+  List<Widget> showingIndicators() {
+    Map<CategoryDescriptor, double> data = getData();
+    return List.generate(data.length, (index) {
+      return Column(children: <Widget>[
+        Row(
+          children: [
+            Indicator(
+              color: colors[index],
+              text: data.keys.elementAt(index).getName(context),
+              isSquare: true,
+            ),
+            Text(data.keys.elementAt(index).emoji)
+          ],
+        ),
+        const SizedBox(
+          height: 4,
+        )
+      ]);
+    });
+  }
+
+  List<PieChartSectionData> showingSections() {
+    Map<CategoryDescriptor, double> data = getData();
+    return List.generate(data.length, (i) {
+      final isTouched = i == touchedIndex;
+      final fontSize = isTouched ? 16.0 : 10.0;
+      final radius = isTouched ? 60.0 : 50.0;
+      return PieChartSectionData(
+          color: colors[i],
+          value: data.values.elementAt(i),
+          title: data.keys.elementAt(i).getName(context),
+          radius: radius,
+          titleStyle: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xffffffff),
+          ),
+          badgeWidget: isTouched
+              ? Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${(data.values.elementAt(i) * totalValueDisplayed / 100).toStringAsFixed(2)}€',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                )
+              : null,
+          badgePositionPercentageOffset: 1);
+    });
+  }
+
+  Map<CategoryDescriptor, double> getData() {
+    List<Expenditure> results = DatabaseHandler.expendituresList;
+    List<Expenditure> dataToPlot = List.empty(growable: true);
+    Set<CategoryDescriptor> categoriesToPlot = {};
+    Map<CategoryDescriptor, double> dataToPlotGroupedBycategories = {};
+    totalValueDisplayed = 0.0;
+    //Filters by date
+    yy = DateTime(int.parse(yearOnGraph));
+    for (var element in results) {
+      DateTime date = element.date;
+      if (date.year == yy.year) {
+        categoriesToPlot.add(element.category);
+        dataToPlot.add(element);
+      }
+      //Aggregate by categories
+      for (var element in categoriesToPlot) {
+        dataToPlotGroupedBycategories[element] = 0;
+      }
+      for (int i = 0; i < dataToPlot.length; i++) {
+        Expenditure element = dataToPlot[i];
+        totalValueDisplayed += element.value;
+        dataToPlotGroupedBycategories.update(
+          element.category,
+          (value) => element.value + value,
+          ifAbsent: () => element.value,
+        );
+      }
+      //Normalize and converts to %
+      for (var element in dataToPlotGroupedBycategories.keys) {
+        double tmpValue = dataToPlotGroupedBycategories[element]!;
+        tmpValue /= totalValueDisplayed;
+        tmpValue *= 100;
+        dataToPlotGroupedBycategories[element] = tmpValue;
+      }
+    }
+    return dataToPlotGroupedBycategories;
+  }
+
+  List<Widget> showingListTiles() {
+    Map<CategoryDescriptor, double> data = getData();
+    return List.generate(data.length, (index) {
+      return ListTile(
+          leading: Text(data.keys.elementAt(index).emoji),
+          title: Text(data.keys.elementAt(index).getName(context)),
+          trailing: Text(
+              '${(data.values.elementAt(index) * totalValueDisplayed / 100).toStringAsFixed(2)}€'));
+    });
+  }
+}
+
+class MonthlyPieState extends State<MonthlyPie> {
+  int touchedIndex = -1;
+  late ChartsType type;
   DateTime mmyy = DateTime(2021, 12);
 
   String monthOnGraph =
@@ -38,10 +379,10 @@ class PieChart2State extends State<CategoryPie> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChartBloc, ChartState>(builder: (_, chartState) {
+    return BlocBuilder<PieChartBloc, PieChartState>(builder: (_, chartState) {
       type = chartState.chartType;
-      monthOnGraph = chartState.month.toString();
-      yearOnGraph = chartState.year.toString();
+      monthOnGraph = chartState.month.first.toString();
+      yearOnGraph = chartState.year.first.toString();
       return Column(children: [
         Card(
             color: Colors.white,
@@ -163,20 +504,9 @@ class PieChart2State extends State<CategoryPie> {
     mmyy = DateTime(int.parse(yearOnGraph), int.parse(monthOnGraph));
     for (var element in results) {
       DateTime date = element.date;
-      switch (type) {
-        case PieType.monthly:
-          if (date.month == mmyy.month && date.year == mmyy.year) {
-            categoriesToPlot.add(element.category);
-            dataToPlot.add(element);
-          }
-
-          break;
-        case PieType.yearly:
-          if (date.year == mmyy.year) {
-            categoriesToPlot.add(element.category);
-            dataToPlot.add(element);
-          }
-          break;
+      if (date.month == mmyy.month && date.year == mmyy.year) {
+        categoriesToPlot.add(element.category);
+        dataToPlot.add(element);
       }
     }
     //Aggregate by categories

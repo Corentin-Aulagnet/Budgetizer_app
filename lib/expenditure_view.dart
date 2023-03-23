@@ -69,7 +69,7 @@ class ExpenditureViewState extends State<ExpenditureView> {
                       builder: (context) => AddExpenditureView(
                             expenditure: widget.expenditure,
                           ))).then((_) async {
-                await DatabaseHandler.fetchData();
+                await DatabaseHandler().fetchData();
                 findExpenditureDisplayed();
                 setState(() {});
               });

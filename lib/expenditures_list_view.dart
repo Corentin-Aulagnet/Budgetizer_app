@@ -7,7 +7,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:budgetizer/home.dart';
 
 class _ExpendituresState extends State<Expenditures> {
-  late Future<List<Expenditure>> _dataFuture = DatabaseHandler.fetchData();
+  late Future<List<Expenditure>> _dataFuture = DatabaseHandler().fetchData();
   @override
   @override
   Widget build(BuildContext context) {

@@ -48,8 +48,10 @@ dependencies:
   searchable_listview: ^2.2.1
   material_design_icons_flutter : ^6.0.7096
   font_awesome_flutter: ^10.4.0
+  icofont_flutter: ^1.4.0
   bloc: ^8.1.0
   flutter_bloc: ^8.1.1
+  multiple_search_selection: ^2.4.5
   
 dev_dependencies:
   flutter_test:

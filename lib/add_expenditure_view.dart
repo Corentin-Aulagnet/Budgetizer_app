@@ -63,7 +63,9 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         hintText: 'amount',
         labelText: 'Amount',
       ),
-      initialValue: widget.expenditure.value.toString(),
+      initialValue: widget.expenditure.value.isNaN
+          ? ''
+          : widget.expenditure.value.toString(),
       onChanged: (String? value) {
         // This optional block of code can be used to run
         // code when the user saves the form.
