@@ -10,6 +10,7 @@ import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:patterns_canvas/patterns_canvas.dart';
 
 import '../../app_colors.dart';
+import '../../navigation_drawer.dart';
 
 class CategoriesView extends StatelessWidget {
   @override
@@ -19,7 +20,7 @@ class CategoriesView extends StatelessWidget {
         child: Scaffold(
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
             floatingActionButton: AddCategoryFAB(),
-            drawer: Home.appNavigationDrawer(context),
+            drawer: AppNavigationDrawer(),
             appBar: AppBar(
               title: Text(AppLocalizations.of(context)!.welcomeMessage),
             ),

@@ -168,8 +168,7 @@ void showDeleteDialog(
                     .categoryDeleteConfirmationMessage(category.name)),
                 Text(AppLocalizations.of(context)!
                     .categoryDeleteConfimationMessageUses(
-                        DatabaseHandler.countExpensesInCategory(category)
-                            .toString()))
+                        DatabaseHandler.countExpensesInCategory(category)))
               ],
             ),
             actions: <Widget>[
@@ -178,6 +177,8 @@ void showDeleteDialog(
                   await DatabaseHandler().deleteCategory(category);
                   callback();
                   Navigator.of(context).pop();
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text("Category deleted"))); //TODO localization
                 },
                 child: const Text(
                   'Delete', //TODO localization

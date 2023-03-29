@@ -130,6 +130,8 @@ class _CreateCategoryView extends State<CreateCategoryView> {
               descriptors: [],
             );
       await DatabaseHandler().saveCategory(categoryToAdd);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Category added"))); //TODO localization
     }
     return true;
   }

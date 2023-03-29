@@ -251,6 +251,10 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
       return false;
     } else {
       await DatabaseHandler().updateData(widget.expenditure);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(widget.isModifying
+              ? "Expense updated"
+              : "Expense added"))); //TODO localization
     }
     return true;
   }

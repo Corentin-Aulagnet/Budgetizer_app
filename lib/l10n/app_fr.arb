@@ -3,6 +3,8 @@
     "addExpenseTitle" : "Ajouter une dépense",
     "modifyExpenseTitle" : "Modifier",
     "noCategoryName": "Pas de Categorie",
-    "categoryDeleteConfirmationMessage":"Voulez-vous vraiment supprimer la catégorie ${name}",
-    "categoryDeleteConfimationMessageUses": "Elle est utilisée par {number} dépenses dans la base de données"
+    "categoryDeleteConfirmationMessage":"Voulez-vous vraiment supprimer la catégorie {name}",
+    "categoryDeleteConfimationMessageUses": "{count,plural, =0{Elle n'est utilisée par aucune dépense dans la base de données} =1{Elle est utilisée par 1 dépense dans la base de données} other{Elle est utilisée par {count} dépenses dans la base de données}} ",
+    "monthPreview": "Voilà à quoi ressemble {date} jusqu'ici",
+    "welcomeUser": "Bonjour {user} !"
 }

@@ -257,8 +257,6 @@ class BarChartBloc extends Bloc<BarChartEvent, BarChartState> {
       if (dates.contains(date)) {
         dates.remove(date);
         emit(BarChartState(dates: dates));
-      } else {
-        //TODO throw SnackBar for error
       }
     }
   }

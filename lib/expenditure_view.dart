@@ -42,6 +42,9 @@ class ExpenditureViewState extends State<ExpenditureView> {
                                   .deleteExpense(widget.expenditure);
                               Navigator.of(context).pop();
                               Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text(
+                                      "Expense deleted"))); //TODO localization
                             },
                             child: const Text(
                               'Delete', //TODO localization

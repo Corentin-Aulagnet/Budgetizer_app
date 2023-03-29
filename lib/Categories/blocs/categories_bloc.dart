@@ -97,6 +97,7 @@ class CategoryViewBloc extends Bloc<CategoryEvent, CategoryViewState> {
     }
     await DatabaseHandler()
         .updateCategories([event.currentCategory, oldParent, event.newParent]);
+    //TODO snackbar
     emit(CategoryViewChanged(clustersExpanded: clustersExpanded));
   }
 }

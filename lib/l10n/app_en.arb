@@ -22,14 +22,32 @@
       }
     }
   },
-  "categoryDeleteConfimationMessageUses": "It is used by {number} expenses in the database",
+  "categoryDeleteConfimationMessageUses":"{count, plural, =0{It is used by no expenses in the database} =1{It is used by 1 expense in the database} other{It is used by {count} expenses in the database} }",
   "@categoryDeleteConfimationMessageUses": {
     "description": "A message with a single parameter",
     "placeholders": {
-      "number": {
-        "type": "String",
+      "count": {
+        "type": "num",
+        "format":"compact",
         "example": "12"
       }
     }
+  },
+  "monthPreview": "Here is what {date} looks so far",
+"@monthPreview": {
+  "description": "A message with a date parameter",
+  "placeholders": {
+    "date": {
+      "type": "DateTime",
+      "format": "yMMMM"
+    }
   }
+},"welcomeUser":"Hello {user}!",
+"@welcomeUser": {
+  "description": "Greets the user",
+  "placeholders": {
+    "user": {
+      "type": "String"
+    }}}
+  
 }

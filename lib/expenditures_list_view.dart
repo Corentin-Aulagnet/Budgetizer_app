@@ -8,6 +8,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:budgetizer/home.dart';
 
 import 'app_colors.dart';
+import 'navigation_drawer.dart';
 
 class _ExpendituresState extends State<Expenditures> {
   late Future<List<Expenditure>> _dataFuture = DatabaseHandler().fetchData();
@@ -31,7 +32,7 @@ class _ExpendituresState extends State<Expenditures> {
               backgroundColor: AppColors.secondaryColor,
               child: const Icon(Icons.add),
             ),
-            drawer: Home.appNavigationDrawer(context),
+            drawer: AppNavigationDrawer(),
             appBar: AppBar(
               title: Text(AppLocalizations.of(context)!.welcomeMessage),
             ),

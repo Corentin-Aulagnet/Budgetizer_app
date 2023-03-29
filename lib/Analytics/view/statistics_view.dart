@@ -11,6 +11,7 @@ import 'package:icofont_flutter/icofont_flutter.dart';
 import 'package:multiple_search_selection/multiple_search_selection.dart';
 
 import '../../app_colors.dart';
+import '../../navigation_drawer.dart';
 
 class StatisticsView extends StatelessWidget {
   StatisticsView({super.key});
@@ -61,7 +62,7 @@ class Statistics extends StatelessWidget {
           backgroundColor: AppColors.secondaryColor,
           child: const Icon(Icons.add),
         ),
-        drawer: Home.appNavigationDrawer(context),
+        drawer: AppNavigationDrawer(),
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.welcomeMessage),
         ),
