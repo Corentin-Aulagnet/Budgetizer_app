@@ -1,5 +1,5 @@
 import 'package:budgetizer/Categories/blocs/categories_bloc.dart';
-import 'package:budgetizer/create_category_view.dart';
+import 'package:budgetizer/Categories/view/create_category_view.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/home.dart';

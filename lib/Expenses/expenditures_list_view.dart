@@ -1,14 +1,14 @@
-import 'package:budgetizer/add_expenditure_view.dart';
+import 'package:budgetizer/Expenses/add_expenditure_view.dart';
 import 'package:flutter/material.dart';
-import 'package:budgetizer/expenditure_view.dart';
+import 'package:budgetizer/Expenses/expenditure_view.dart';
 import 'package:budgetizer/database_handler.dart';
-import 'package:budgetizer/expenditure.dart';
+import 'package:budgetizer/Expenses/expenditure.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:budgetizer/home.dart';
 
-import 'app_colors.dart';
-import 'navigation_drawer.dart';
+import '../app_colors.dart';
+import '../navigation_drawer.dart';
 
 class _ExpendituresState extends State<Expenditures> {
   late Future<List<Expenditure>> _dataFuture = DatabaseHandler().fetchData();

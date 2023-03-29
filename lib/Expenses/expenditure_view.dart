@@ -3,7 +3,7 @@ import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
 import 'expenditure.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:budgetizer/add_expenditure_view.dart';
+import 'package:budgetizer/Expenses/add_expenditure_view.dart';
 
 class ExpenditureView extends StatefulWidget {
   Expenditure expenditure;

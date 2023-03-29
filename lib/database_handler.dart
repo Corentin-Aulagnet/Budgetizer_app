@@ -1,5 +1,5 @@
 import 'package:budgetizer/Categories/utils/category_utils.dart';
-import 'package:budgetizer/expenditure.dart';
+import 'package:budgetizer/Expenses/expenditure.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 //Only for dev purposes

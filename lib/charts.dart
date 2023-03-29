@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
-import 'package:budgetizer/expenditure.dart';
+import 'package:budgetizer/Expenses/expenditure.dart';
 import 'package:budgetizer/indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
