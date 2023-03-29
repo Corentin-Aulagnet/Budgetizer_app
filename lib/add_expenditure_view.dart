@@ -1,4 +1,4 @@
-import 'package:budgetizer/Icons_Selector/category_utils.dart';
+import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:budgetizer/home.dart';
@@ -60,8 +60,8 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   Widget amountFieldForm() {
     return TextFormField(
       decoration: const InputDecoration(
-        hintText: 'amount',
-        labelText: 'Amount',
+        hintText: 'amount', //TODO localization
+        labelText: 'Amount', //TODO localization
       ),
       initialValue: widget.expenditure.value.isNaN
           ? ''
@@ -83,7 +83,11 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   Widget categoriesSearchableList() {
     return SearchableList<CategoryDescriptor>(
         key: UniqueKey(),
-        initialList: DatabaseHandler.categoriesList +
+        //only keep the categories that don't have children -> child category or orphan
+        //Clusters should not be accessible as a base category
+        initialList: List<CategoryDescriptor>.from(DatabaseHandler
+                .categoriesList
+                .where((element) => element.children.isEmpty)) +
             [
               CategoryDescriptor(
                 id: 0,
@@ -92,12 +96,11 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
                 descriptors: [""],
               )
             ],
-        filter: (value) => DatabaseHandler.categoriesList
-            .where(
+        filter: (value) =>
+            List<CategoryDescriptor>.from(DatabaseHandler.categoriesList.where(
               (element) =>
                   element.getName(context).toLowerCase().contains(value),
-            )
-            .toList(),
+            )),
         builder: (CategoryDescriptor category) {
           if (category.getName(context) == "Create a category") {
             //TODO localization

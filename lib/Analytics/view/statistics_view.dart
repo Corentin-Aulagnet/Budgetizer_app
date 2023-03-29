@@ -40,6 +40,7 @@ class ChartsTabBar extends StatelessWidget {
 
 class Statistics extends StatelessWidget {
   charts.ChartsType chartType = charts.ChartsType.monthlyPie;
+  bool showAllCategories = false;
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -64,6 +65,7 @@ class Statistics extends StatelessWidget {
                         width: 28,
                       ),
                       DateDropDownMenu(),
+                      categoriesToDisplaySwitch(),
                     ]),
                     SelectedPie(),
                   ])),
@@ -81,6 +83,32 @@ class Statistics extends StatelessWidget {
         ]),
       ),
     );
+  }
+}
+
+class categoriesToDisplaySwitch extends StatelessWidget {
+  bool showAllCategories = false;
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<PieChartBloc, PieChartState>(
+        builder: (context, chartState) {
+      return Card(
+          child: Row(children: [
+        Text('Display all actegories'), //TODO localization
+        Switch(
+            // This bool value toggles the switch.
+
+            value: showAllCategories,
+            activeColor: primaryColor,
+            onChanged: (bool value) {
+              // This is called when the user toggles the switch.
+              showAllCategories = value;
+              BlocProvider.of<PieChartBloc>(context).add(
+                  ChangePieChartCategoriesDisplayed(
+                      showAllCategories: showAllCategories));
+            })
+      ]));
+    });
   }
 }
 
@@ -187,8 +215,8 @@ class PieTypeChips extends StatelessWidget {
             selected: type == charts.ChartsType.monthlyPie,
             onSelected: (bool selected) {
               if (selected) {
-                BlocProvider.of<PieChartBloc>(context).add(
-                    const ChangePieChartType(charts.ChartsType.monthlyPie));
+                BlocProvider.of<PieChartBloc>(context).add(ChangePieChartType(
+                    chartType: charts.ChartsType.monthlyPie));
                 type = charts.ChartsType.monthlyPie;
               } else {
                 type = null;
@@ -200,8 +228,8 @@ class PieTypeChips extends StatelessWidget {
             selected: type == charts.ChartsType.yearlyPie,
             onSelected: (bool selected) {
               if (selected) {
-                BlocProvider.of<PieChartBloc>(context)
-                    .add(const ChangePieChartType(charts.ChartsType.yearlyPie));
+                BlocProvider.of<PieChartBloc>(context).add(
+                    ChangePieChartType(chartType: charts.ChartsType.yearlyPie));
                 type = charts.ChartsType.yearlyPie;
               } else {
                 type = null;
@@ -219,7 +247,8 @@ class DateDropDownMenu extends StatelessWidget {
   Widget build(context) {
     return BlocBuilder<PieChartBloc, PieChartState>(
         builder: (context, chartState) {
-      return Row(children: showingDateDropDownButton(chartState, context));
+      return Card(
+          child: Row(children: showingDateDropDownButton(chartState, context)));
     });
   }
 
@@ -231,8 +260,8 @@ class DateDropDownMenu extends StatelessWidget {
           value: chartState.month.first,
           onChanged: (String? value) {
             // This is called when the user selects an item.
-            BlocProvider.of<PieChartBloc>(context)
-                .add(ChangePieChartDate([value!], chartState.year));
+            BlocProvider.of<PieChartBloc>(context).add(
+                ChangePieChartDate(month: [value!], year: chartState.year));
           },
           items: getMonths(context),
         ),
@@ -240,8 +269,8 @@ class DateDropDownMenu extends StatelessWidget {
           value: chartState.year.first,
           onChanged: (String? value) {
             // This is called when the user selects an item.
-            BlocProvider.of<PieChartBloc>(context)
-                .add(ChangePieChartDate(chartState.month, [value!]));
+            BlocProvider.of<PieChartBloc>(context).add(
+                ChangePieChartDate(month: chartState.month, year: [value!]));
           },
           items: getYears(context),
         ),
@@ -252,8 +281,8 @@ class DateDropDownMenu extends StatelessWidget {
           value: chartState.year.first,
           onChanged: (String? value) {
             // This is called when the user selects an item.
-            BlocProvider.of<PieChartBloc>(context)
-                .add(ChangePieChartDate(chartState.month, [value!]));
+            BlocProvider.of<PieChartBloc>(context).add(
+                ChangePieChartDate(month: chartState.month, year: [value!]));
           },
           items: getYears(context),
         ),

@@ -53,31 +53,37 @@ class MonthDisplay {
 }
 
 //events
-class PieChartEvent {
+abstract class PieChartEvent {
   final int tabIndex;
-  const PieChartEvent({this.tabIndex = -1});
+  PieChartEvent({this.tabIndex = -1});
 }
 
 class ChangePieChartType extends PieChartEvent {
   final charts.ChartsType chartType;
-  const ChangePieChartType(this.chartType, {int tabIndex = -1})
+  ChangePieChartType({required this.chartType, int tabIndex = -1})
       : super(tabIndex: tabIndex);
   @override
   String toString() => 'changeChartType { type: $chartType }';
 }
 
+class ChangePieChartCategoriesDisplayed extends PieChartEvent {
+  final bool showAllCategories;
+  ChangePieChartCategoriesDisplayed(
+      {required this.showAllCategories, int tabIndex = -1})
+      : super(tabIndex: tabIndex);
+  @override
+  String toString() =>
+      'ChangePieChartCategoriesDisplayed { bool: $showAllCategories }';
+}
+
 class ChangePieChartDate extends PieChartEvent {
   final List<String> month;
   final List<String> year;
-  const ChangePieChartDate(this.month, this.year, {int tabIndex = -1})
+  ChangePieChartDate(
+      {required this.month, required this.year, int tabIndex = -1})
       : super(tabIndex: tabIndex);
   @override
   String toString() => 'changeChartDate { date: $month/$year }';
-}
-
-class LoadPreviousState extends PieChartEvent {
-  final PieChartState state;
-  const LoadPreviousState(this.state);
 }
 
 //states
@@ -86,29 +92,34 @@ abstract class PieChartState {
   final List<String> month;
   final List<String> year;
   final int tabIndex;
+  final bool showAllCategories;
   const PieChartState(
       {required this.chartType,
       required this.month,
       required this.year,
+      required this.showAllCategories,
       this.tabIndex = -1});
 }
 
 class PieChartChanged extends PieChartState {
-  //final charts.ChartsType chartType;
-  //final List<String> month;
-  //final List<String> year;
   const PieChartChanged(
       {required charts.ChartsType chartType,
       required List<String> month,
       required List<String> year,
+      required bool showAllCategories,
       int tabIndex = -1})
       : super(
-            chartType: chartType, month: month, year: year, tabIndex: tabIndex);
+            chartType: chartType,
+            month: month,
+            year: year,
+            tabIndex: tabIndex,
+            showAllCategories: showAllCategories);
 
   @override
   charts.ChartsType get type => chartType;
   @override
-  String toString() => 'chartChanged { type: $chartType, date: $month/$year }';
+  String toString() =>
+      'chartChanged { type: $chartType, date: $month/$year ,displayAll : $showAllCategories}';
 }
 
 //Bloc
@@ -119,10 +130,12 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
   Set<String> months = {};
   Set<String> years = {};
   PieChartState? previousState;
+  bool showAllCategories = false;
   PieChartBloc()
       : super(
           PieChartChanged(
               tabIndex: 0,
+              showAllCategories: false,
               chartType: charts.ChartsType.monthlyPie,
               month: [
                 DatabaseHandler.expendituresList.first.date.month.toString()
@@ -142,11 +155,18 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
     year = [years.first];
     on<ChangePieChartDate>(onDateChanged);
     on<ChangePieChartType>(onTypeChanged);
-    on<LoadPreviousState>(onLoadPreviousState);
+    on<ChangePieChartCategoriesDisplayed>(onChangePieChartCategoriesDisplayed);
   }
   PieChartBloc.unique(
-      {required this.chartType, required this.month, required this.year})
-      : super(PieChartChanged(chartType: chartType, month: month, year: year)) {
+      {required this.chartType,
+      required this.month,
+      required this.year,
+      required this.showAllCategories})
+      : super(PieChartChanged(
+            showAllCategories: showAllCategories,
+            chartType: chartType,
+            month: month,
+            year: year)) {
     List<Expenditure> results = DatabaseHandler.expendituresList;
     for (var element in results) {
       DateTime date = element.date;
@@ -162,25 +182,31 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
     year = event.year;
     previousState = state;
     emit(PieChartChanged(
+        showAllCategories: showAllCategories,
         chartType: chartType,
         month: event.month,
         year: event.year,
         tabIndex: event.tabIndex));
   }
 
-  void onLoadPreviousState(
-      LoadPreviousState event, Emitter<PieChartState> emit) {
-    emit(PieChartChanged(
-        chartType: event.state.chartType,
-        month: event.state.month,
-        year: event.state.year));
-  }
-
   void onTypeChanged(ChangePieChartType event, Emitter<PieChartState> emit) {
     chartType = event.chartType;
     previousState = state;
     emit(PieChartChanged(
+        showAllCategories: showAllCategories,
         chartType: event.chartType,
+        month: month,
+        year: year,
+        tabIndex: event.tabIndex));
+  }
+
+  void onChangePieChartCategoriesDisplayed(
+      ChangePieChartCategoriesDisplayed event, Emitter<PieChartState> emit) {
+    showAllCategories = event.showAllCategories;
+    previousState = state;
+    emit(PieChartChanged(
+        showAllCategories: event.showAllCategories,
+        chartType: chartType,
         month: month,
         year: year,
         tabIndex: event.tabIndex));

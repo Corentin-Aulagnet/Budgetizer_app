@@ -1,5 +1,6 @@
 import 'package:budgetizer/charts.dart';
 import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
+import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'add_expenditure_view.dart';
@@ -27,7 +28,6 @@ class Home extends StatefulWidget {
         child: Column(
       children: [
         const UserAccountsDrawerHeader(
-          // <-- SEE HERE
           decoration: BoxDecoration(color: primaryColor),
           accountName: Text(
             "Test User",
@@ -45,17 +45,20 @@ class Home extends StatefulWidget {
         ),
         ListTile(
             leading: const Icon(Icons.home),
-            title: const Text("Home"),
+            title: const Text("Home"), //TODO Localization
             onTap: () => Navigator.popAndPushNamed(context, '/')),
         ListTile(
             leading: Icon(Icons.format_list_bulleted_rounded),
-            title: const Text("Expenses"),
+            title: const Text("Expenses"), //TODO localization
             onTap: () => Navigator.popAndPushNamed(context, '/Expenses')),
         ListTile(
             leading: Icon(Icons.auto_graph),
-            title: const Text("Analytics"),
+            title: const Text("Analytics"), //TODO localization
             onTap: () => Navigator.popAndPushNamed(context, '/Analytics')),
-
+        ListTile(
+            leading: Icon(Icons.category_rounded),
+            title: const Text("Categories"), //TODO localization
+            onTap: () => Navigator.popAndPushNamed(context, '/Categories')),
         Spacer(), // <-- This will fill up any free-space
         // Everything from here down is bottom aligned in the drawer
         Divider(),
@@ -70,6 +73,7 @@ class Home extends StatefulWidget {
   static FloatingActionButton addExpenditureFloatingActionButton(context) {
     return FloatingActionButton(
       onPressed: () {
+        //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
         // Add your onPressed code here!
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => AddExpenditureView()));
@@ -87,29 +91,43 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (_) => PieChartBloc.unique(
-            chartType: ChartsType.monthlyPie,
-            month: [DateTime.now().month.toString()],
-            year: [DateTime.now().year.toString()]),
-        child: Scaffold(
-            drawer: Home.appNavigationDrawer(context),
-            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-            appBar: AppBar(
-              title: Text(AppLocalizations.of(context)!.welcomeMessage),
-            ),
-            floatingActionButton:
-                Home.addExpenditureFloatingActionButton(context),
-            body: Column(
-              children: [
-                Center(
-                    child: Text(
-                  "Votre mois de ${DateTime.now().month.toString()} ${DateTime.now().year.toString()}", //TODO localization
-                  style: const TextStyle(
-                      fontSize: 30, fontWeight: FontWeight.bold),
-                )),
-                MonthlyPie()
-              ],
-            )));
+    if (DatabaseHandler.expendituresList.isNotEmpty) {
+      return BlocProvider(
+          create: (_) => PieChartBloc.unique(
+              showAllCategories: false,
+              chartType: ChartsType.monthlyPie,
+              month: [DateTime.now().month.toString()],
+              year: [DateTime.now().year.toString()]),
+          child: Scaffold(
+              drawer: Home.appNavigationDrawer(context),
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.endFloat,
+              appBar: AppBar(
+                title: Text(AppLocalizations.of(context)!.welcomeMessage),
+              ),
+              floatingActionButton:
+                  Home.addExpenditureFloatingActionButton(context),
+              body: Column(
+                children: [
+                  Center(
+                      child: Text(
+                    "Votre mois de ${DateTime.now().month.toString()} ${DateTime.now().year.toString()}", //TODO localization
+                    style: const TextStyle(
+                        fontSize: 30, fontWeight: FontWeight.bold),
+                  )),
+                  MonthlyPie()
+                ],
+              )));
+    } else {
+      return Scaffold(
+        drawer: Home.appNavigationDrawer(context),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.welcomeMessage),
+        ),
+        floatingActionButton: Home.addExpenditureFloatingActionButton(context),
+        body: null,
+      );
+    }
   }
 }

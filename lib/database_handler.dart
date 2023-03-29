@@ -1,8 +1,7 @@
-import 'package:budgetizer/Icons_Selector/category_utils.dart';
+import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:budgetizer/home.dart';
 //Only for dev purposes
 
 class DatabaseHandler {
@@ -14,7 +13,6 @@ class DatabaseHandler {
 
   static List<Expenditure> expendituresList = List.empty(growable: true);
   static List<CategoryDescriptor> categoriesList = List.empty(growable: true);
-
   static DateTime defaultDate = DateTime(1970);
 
   late Database db;
@@ -27,6 +25,12 @@ class DatabaseHandler {
   factory DatabaseHandler() {
     return _instance;
   }
+  static List<CategoryDescriptor> get clustersCategories =>
+      List<CategoryDescriptor>.from(DatabaseHandler.categoriesList
+          .where((element) => element.isCluster()));
+  static List<CategoryDescriptor> get nonClustersCategories =>
+      List<CategoryDescriptor>.from(DatabaseHandler.categoriesList
+          .where((element) => !element.isCluster()));
 
   Future<void> initializeDatabaseConnexion() async {
     //final file = File(join(await getDatabasesPath(), databaseName));
@@ -41,7 +45,7 @@ class DatabaseHandler {
       onCreate: (Database db, int version) async {
         // Run the CREATE TABLE statement on the database
         await db.execute(
-            'CREATE TABLE $categoriesTableName (id INTEGER PRIMARY KEY, name TEXT, descriptors TEXT, icon TEXT, color TEXT)');
+            'CREATE TABLE $categoriesTableName (id INTEGER PRIMARY KEY, name TEXT, descriptors TEXT, icon TEXT, parentId TEXT, childrenIds TEXT)');
         await db.execute(
             'CREATE TABLE $expensesTableName (id INTEGER PRIMARY KEY, title TEXT,  categoryID INTEGER, value DOUBLE, date DATE, FOREIGN KEY (categoryID) REFERENCES $categoriesTableName (id)  )');
       },
@@ -147,8 +151,38 @@ class DatabaseHandler {
     mapToInsert['name'] = category.name;
     mapToInsert['descriptors'] = category.descriptors.join('-');
     mapToInsert['icon'] = category.emoji;
+    mapToInsert['parentId'] =
+        category.parent == null ? '' : category.parent!.id;
+    String childrenIds = '';
+    for (CategoryDescriptor child in category.children) {
+      childrenIds += '/${child.id}';
+    }
+    mapToInsert['childrenIds'] = childrenIds; //The string is /id/id/id....
     //Updates the id of the category in the app
     categoriesList.last.id = await db.insert(categoriesTableName, mapToInsert);
+  }
+
+  Future<void> updateCategories(
+      List<CategoryDescriptor?> categoriesToUpdate) async {
+    for (CategoryDescriptor? cat in categoriesToUpdate) {
+      if (cat != null) {
+        categoriesList.remove(cat); //replace the old instance of the category
+        categoriesList.add(cat); //add it
+        //Update the remote database
+        Map<String, dynamic> mapToInsert = {};
+        mapToInsert['name'] = cat.name;
+        mapToInsert['descriptors'] = cat.descriptors.join('-');
+        mapToInsert['icon'] = cat.emoji;
+        mapToInsert['parentId'] = cat.parent == null ? '' : cat.parent!.id;
+        String childrenIds = '';
+        for (CategoryDescriptor child in cat.children) {
+          childrenIds += '/${child.id}';
+        }
+        mapToInsert['childrenIds'] = childrenIds;
+        await db.update(categoriesTableName, mapToInsert,
+            where: 'id = ?', whereArgs: [cat.id]);
+      }
+    }
   }
 
   Future<void> loadCategories() async {
@@ -156,6 +190,7 @@ class DatabaseHandler {
     var data = await db.query(categoriesTableName);
 
     categoriesList.clear();
+    //First create all the categories
     for (var row in data) {
       CategoryDescriptor category = CategoryDescriptor(
           id: int.parse(row['id'].toString()),
@@ -163,6 +198,18 @@ class DatabaseHandler {
           name: row['name'].toString(),
           descriptors: row['descriptors'].toString().split('-'));
       categoriesList.add(category);
+    }
+    //Then update the hierarchy relationships
+    for (var row in data) {
+      if (row['parentId'] != '') {
+        //This category has a parent
+        CategoryDescriptor parent =
+            matchCategory(int.parse(row['parentId'].toString()))!;
+        CategoryDescriptor child =
+            matchCategory(int.parse(row['id'].toString()))!;
+        parent.addChild(child);
+        child.makeChildOf(parent);
+      }
     }
   }
 

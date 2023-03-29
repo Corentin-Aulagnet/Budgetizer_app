@@ -1,6 +1,5 @@
-import 'package:budgetizer/Icons_Selector/category_utils.dart';
+import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
-import 'package:flutter/material.dart';
 
 class Expenditure {
   late String title;

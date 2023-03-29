@@ -7,6 +7,7 @@ import 'package:budgetizer/database_handler.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:budgetizer/Categories/view/categories_view.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
           '/': (context) => Home(),
           '/Expenses': (context) => Expenditures(),
           '/Analytics': (context) => StatisticsView(),
+          '/Categories': (context) => CategoriesView(),
           '/Options': (context) => OptionsView(),
         });
     //home: Home());

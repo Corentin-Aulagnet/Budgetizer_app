@@ -1,15 +1,14 @@
 import 'dart:math';
 
-import 'package:budgetizer/Icons_Selector/category_utils.dart';
+import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:budgetizer/indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
-import 'package:budgetizer/Analytics/view/statistics_view.dart';
 
 class YearlyPie extends StatefulWidget {
   YearlyPie({super.key});
@@ -40,9 +39,44 @@ class MontlhyBarChart extends StatelessWidget {
                       titlesData: xAxisTitlesData,
                       barGroups: getData(months),
                       gridData: FlGridData(drawVerticalLine: false))))),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: showingIndicators(context, months),
+          ),
         ]);
       },
     );
+  }
+
+  List<Widget> showingIndicators(
+      BuildContext context, List<MonthDisplay> monthsToDisplay) {
+    Set<CategoryDescriptor> categoriesDisplayed = {};
+    monthsToDisplay = bubbleSort(monthsToDisplay);
+    for (MonthDisplay monthYear in monthsToDisplay) {
+      Map<CategoryDescriptor, double> dataAggregate = getDataByMonth(monthYear);
+      categoriesDisplayed.addAll(dataAggregate.keys);
+    }
+
+    return List.generate(categoriesDisplayed.length, (index) {
+      return Column(children: <Widget>[
+        Row(
+          children: [
+            Indicator(
+              color: colors[index],
+              text: List.from(categoriesDisplayed)
+                  .elementAt(index)
+                  .getName(context),
+              isSquare: true,
+            ),
+            Text(List.from(categoriesDisplayed).elementAt(index).emoji)
+          ],
+        ),
+        const SizedBox(
+          height: 4,
+        )
+      ]);
+    });
   }
 
   Widget getXAxisTitles(double value, TitleMeta meta) {
@@ -118,11 +152,19 @@ class MontlhyBarChart extends StatelessWidget {
     maxY = 0;
     //aggregate data per categorie per months
     Map<String, Map<CategoryDescriptor, double>> data = {};
+    Set<CategoryDescriptor> categories = {};
+    Map<CategoryDescriptor, Color> categoryColor = {};
     monthsToDisplay = bubbleSort(monthsToDisplay);
     for (MonthDisplay monthYear in monthsToDisplay) {
       Map<CategoryDescriptor, double> dataAggregate = getDataByMonth(monthYear);
+      categories.addAll(dataAggregate.keys);
       data[monthYear.toString()] = dataAggregate;
     }
+    //Atribute a color for each categories that will be displayed
+    for (int index = 0; index < List.from(categories).length; index++) {
+      categoryColor[List.from(categories)[index]] = colors[index];
+    }
+
     List<BarChartGroupData> groups = List.empty(growable: true);
     for (int monthIndex = 0; monthIndex < data.keys.length; monthIndex++) {
       //create one BarChartRodStackItem per category in a month
@@ -137,7 +179,7 @@ class MontlhyBarChart extends StatelessWidget {
         CategoryDescriptor cat = dataAggregate.keys.elementAt(catIndex);
         double value = dataAggregate[cat]!;
         monthRodStackItems.add(BarChartRodStackItem(
-            nextFromValue, nextFromValue + value, colors[catIndex]));
+            nextFromValue, nextFromValue + value, categoryColor[cat]!));
         nextFromValue += value;
       }
       maxY = max(maxY, nextFromValue);
@@ -157,15 +199,19 @@ class MontlhyBarChart extends StatelessWidget {
     Map<CategoryDescriptor, double> dataToPlotGroupedBycategories = {};
     //Filters by date
     DateTime mmyy = DateTime(monthYear.y, monthYear.m);
-    for (var element in results) {
+    for (Expenditure element in results) {
       DateTime date = element.date;
-      if (date.month == mmyy.month && date.year == mmyy.year) {
+      bool categoryIsARoot = element.category.parent == null;
+      if (date.month == mmyy.month &&
+          date.year == mmyy.year &&
+          categoryIsARoot) {
+        //Show only cluster or orphan category (ie. that have no parents)
         categoriesToPlot.add(element.category);
         dataToPlot.add(element);
       }
     }
     //Aggregate by categories
-    for (var element in categoriesToPlot) {
+    for (CategoryDescriptor element in categoriesToPlot) {
       dataToPlotGroupedBycategories[element] = 0;
     }
     for (int i = 0; i < dataToPlot.length; i++) {
@@ -193,7 +239,7 @@ class YearlyPieState extends State<YearlyPie> {
   int touchedIndex = -1;
   late ChartsType type;
   DateTime yy = DateTime(2021);
-
+  bool displayAllCategories = false;
   String yearOnGraph =
       DatabaseHandler.expendituresList.first.date.year.toString();
 
@@ -204,6 +250,7 @@ class YearlyPieState extends State<YearlyPie> {
     return BlocBuilder<PieChartBloc, PieChartState>(builder: (_, chartState) {
       type = chartState.chartType;
       yearOnGraph = chartState.year.first.toString();
+      displayAllCategories = chartState.showAllCategories;
       return Column(children: [
         Card(
             color: Colors.white,
@@ -323,23 +370,32 @@ class YearlyPieState extends State<YearlyPie> {
     totalValueDisplayed = 0.0;
     //Filters by date
     yy = DateTime(int.parse(yearOnGraph));
-    for (var element in results) {
-      DateTime date = element.date;
-      if (date.year == yy.year) {
-        categoriesToPlot.add(element.category);
-        dataToPlot.add(element);
+    for (Expenditure exp in results) {
+      DateTime date = exp.date;
+      bool categoryIsARoot = exp.category.parent == null;
+      if (date.year == yy.year && (displayAllCategories || categoryIsARoot)) {
+        categoriesToPlot.add(exp.category);
+        dataToPlot.add(exp);
+      } else if (date.year == yy.year &&
+          !(displayAllCategories || categoryIsARoot)) {
+        dataToPlot.add(Expenditure(
+            title: exp.title,
+            category: exp.category.parent!,
+            value: exp.value,
+            date: date,
+            dataBaseId: exp.dataBaseId));
       }
       //Aggregate by categories
-      for (var element in categoriesToPlot) {
-        dataToPlotGroupedBycategories[element] = 0;
+      for (CategoryDescriptor cat in categoriesToPlot) {
+        dataToPlotGroupedBycategories[cat] = 0;
       }
       for (int i = 0; i < dataToPlot.length; i++) {
-        Expenditure element = dataToPlot[i];
-        totalValueDisplayed += element.value;
+        Expenditure exp = dataToPlot[i];
+        totalValueDisplayed += exp.value;
         dataToPlotGroupedBycategories.update(
-          element.category,
-          (value) => element.value + value,
-          ifAbsent: () => element.value,
+          exp.category,
+          (value) => exp.value + value,
+          ifAbsent: () => exp.value,
         );
       }
       //Normalize and converts to %
@@ -376,6 +432,7 @@ class MonthlyPieState extends State<MonthlyPie> {
       DatabaseHandler.expendituresList.first.date.year.toString();
 
   double totalValueDisplayed = 0.0;
+  bool displayAllCategories = false;
 
   @override
   Widget build(BuildContext context) {
@@ -383,6 +440,7 @@ class MonthlyPieState extends State<MonthlyPie> {
       type = chartState.chartType;
       monthOnGraph = chartState.month.first.toString();
       yearOnGraph = chartState.year.first.toString();
+      displayAllCategories = chartState.showAllCategories;
       return Column(children: [
         Card(
             color: Colors.white,
@@ -502,11 +560,23 @@ class MonthlyPieState extends State<MonthlyPie> {
     totalValueDisplayed = 0.0;
     //Filters by date
     mmyy = DateTime(int.parse(yearOnGraph), int.parse(monthOnGraph));
-    for (var element in results) {
-      DateTime date = element.date;
-      if (date.month == mmyy.month && date.year == mmyy.year) {
-        categoriesToPlot.add(element.category);
-        dataToPlot.add(element);
+    for (Expenditure exp in results) {
+      DateTime date = exp.date;
+      bool categoryIsARoot = exp.category.parent == null;
+      if (date.month == mmyy.month &&
+          date.year == mmyy.year &&
+          (displayAllCategories || categoryIsARoot)) {
+        categoriesToPlot.add(exp.category);
+        dataToPlot.add(exp);
+      } else if (date.month == mmyy.month &&
+          date.year == mmyy.year &&
+          !(displayAllCategories || categoryIsARoot)) {
+        dataToPlot.add(Expenditure(
+            title: exp.title,
+            category: exp.category.parent!,
+            value: exp.value,
+            date: date,
+            dataBaseId: exp.dataBaseId));
       }
     }
     //Aggregate by categories

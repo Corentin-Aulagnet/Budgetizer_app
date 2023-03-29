@@ -46,7 +46,7 @@ class _ExpendituresState extends State<Expenditures> {
                             MaterialPageRoute(
                                 builder: (context) =>
                                     ExpenditureView(expenditure: row)),
-                          ).then((_) => setState(() {}));
+                          ).then((_) => refreshView());
                         },
                       );
                     },
@@ -66,6 +66,7 @@ class _ExpendituresState extends State<Expenditures> {
   }
 
   Future<void> refreshView() => Future(() {
+        _dataFuture = DatabaseHandler().fetchData();
         setState(() {});
       });
 }
