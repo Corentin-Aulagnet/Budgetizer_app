@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:budgetizer/Categories/blocs/categories_bloc.dart';
 
 class ClustersTab extends StatelessWidget {
-  bool _customTileExpanded = false;
   final GlobalKey _draggableKey = GlobalKey();
   @override
   Widget build(BuildContext context) {

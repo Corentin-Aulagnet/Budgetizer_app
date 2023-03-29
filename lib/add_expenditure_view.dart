@@ -1,13 +1,14 @@
 import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
-import 'package:budgetizer/home.dart';
 import 'package:flutter/material.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart';
 import 'package:budgetizer/create_category_view.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'app_colors.dart';
 
 class AddExpenditureView extends StatefulWidget {
   AddExpenditureView({super.key, Expenditure? expenditure}) {
@@ -121,7 +122,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           fillColor: Colors.white,
           focusedBorder: OutlineInputBorder(
             borderSide: const BorderSide(
-              color: primaryColor,
+              color: AppColors.primaryColor,
               width: 1.0,
             ),
             borderRadius: BorderRadius.circular(10.0),

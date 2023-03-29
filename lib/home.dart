@@ -6,21 +6,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'add_expenditure_view.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-//const int primaryColor = 0xffed4423;
-const Color primaryColor = Color.fromRGBO(237, 68, 35, 1);
-const Color secondaryColor = Color.fromRGBO(204, 204, 204, 1);
-Map<int, Color> primaryColorSwatch = {
-  50: const Color.fromRGBO(239, 68, 35, 0.1),
-  100: const Color.fromRGBO(239, 68, 35, 0.2),
-  200: const Color.fromRGBO(239, 68, 35, 0.3),
-  300: const Color.fromRGBO(239, 68, 35, 0.4),
-  400: const Color.fromRGBO(239, 68, 35, 0.5),
-  500: const Color.fromRGBO(239, 68, 35, 0.6),
-  600: const Color.fromRGBO(239, 68, 35, 0.7),
-  700: const Color.fromRGBO(239, 68, 35, 0.8),
-  800: const Color.fromRGBO(239, 68, 35, 0.9),
-  900: const Color.fromRGBO(239, 68, 35, 1),
-};
+import 'app_colors.dart';
+
+class AddExpenditureFloatingActionButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
+        // Add your onPressed code here!
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => AddExpenditureView()));
+      },
+      backgroundColor: AppColors.secondaryColor,
+      child: const Icon(Icons.add),
+    );
+  }
+}
 
 class Home extends StatefulWidget {
   static Drawer appNavigationDrawer(context) {
@@ -28,7 +30,7 @@ class Home extends StatefulWidget {
         child: Column(
       children: [
         const UserAccountsDrawerHeader(
-          decoration: BoxDecoration(color: primaryColor),
+          decoration: BoxDecoration(color: AppColors.primaryColor),
           accountName: Text(
             "Test User",
             style: TextStyle(
@@ -70,19 +72,6 @@ class Home extends StatefulWidget {
     ));
   }
 
-  static FloatingActionButton addExpenditureFloatingActionButton(context) {
-    return FloatingActionButton(
-      onPressed: () {
-        //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
-        // Add your onPressed code here!
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => AddExpenditureView()));
-      },
-      backgroundColor: secondaryColor,
-      child: const Icon(Icons.add),
-    );
-  }
-
   Home({super.key});
   @override
   State<Home> createState() => _HomeState();
@@ -105,8 +94,19 @@ class _HomeState extends State<Home> {
               appBar: AppBar(
                 title: Text(AppLocalizations.of(context)!.welcomeMessage),
               ),
-              floatingActionButton:
-                  Home.addExpenditureFloatingActionButton(context),
+              floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                  //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
+                  // Add your onPressed code here!
+                  Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AddExpenditureView()))
+                      .then((_) => setState(() {}));
+                },
+                backgroundColor: AppColors.secondaryColor,
+                child: const Icon(Icons.add),
+              ),
               body: Column(
                 children: [
                   Center(
@@ -125,7 +125,16 @@ class _HomeState extends State<Home> {
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.welcomeMessage),
         ),
-        floatingActionButton: Home.addExpenditureFloatingActionButton(context),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
+            // Add your onPressed code here!
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => AddExpenditureView()));
+          },
+          backgroundColor: AppColors.secondaryColor,
+          child: const Icon(Icons.add),
+        ),
         body: null,
       );
     }

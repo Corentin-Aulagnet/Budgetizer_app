@@ -144,7 +144,7 @@ class CategoryItem extends StatelessWidget {
     return displayBin
         ? IconButton(
             onPressed: () {
-              showDeleteDialog(context, category);
+              showDeleteDialog(context, category, notifyParent);
             },
             icon: const Icon(
               Icons.delete,
@@ -154,7 +154,8 @@ class CategoryItem extends StatelessWidget {
   }
 }
 
-void showDeleteDialog(BuildContext context, CategoryDescriptor category) {
+void showDeleteDialog(
+    BuildContext context, CategoryDescriptor category, Function() callback) {
   showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
@@ -175,7 +176,7 @@ void showDeleteDialog(BuildContext context, CategoryDescriptor category) {
               TextButton(
                 onPressed: () async {
                   await DatabaseHandler().deleteCategory(category);
-                  //await notifyParent();
+                  callback();
                   Navigator.of(context).pop();
                 },
                 child: const Text(

@@ -58,6 +58,8 @@ class CategoryViewBloc extends Bloc<CategoryEvent, CategoryViewState> {
         )) {
     on<CategoryExpanded>(onCategoryExpanded);
     on<CategoryRetracted>(onCategoryRetracted);
+    on<CategoryDeleted>(onCategoryDeleted);
+    on<CategoryAdded>(onCategoryAdded);
     on<CategoryAncestryModified>(onCategoryAncestryModified);
   }
 
@@ -70,6 +72,15 @@ class CategoryViewBloc extends Bloc<CategoryEvent, CategoryViewState> {
   void onCategoryRetracted(
       CategoryRetracted event, Emitter<CategoryViewState> emit) {
     clustersExpanded.remove(event.index);
+    emit(CategoryViewChanged(clustersExpanded: clustersExpanded));
+  }
+
+  void onCategoryDeleted(
+      CategoryDeleted event, Emitter<CategoryViewState> emit) {
+    emit(CategoryViewChanged(clustersExpanded: clustersExpanded));
+  }
+
+  void onCategoryAdded(CategoryAdded event, Emitter<CategoryViewState> emit) {
     emit(CategoryViewChanged(clustersExpanded: clustersExpanded));
   }
 

@@ -1,3 +1,4 @@
+import 'package:budgetizer/add_expenditure_view.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/expenditure.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ import 'package:budgetizer/home.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icofont_flutter/icofont_flutter.dart';
 import 'package:multiple_search_selection/multiple_search_selection.dart';
+
+import '../../app_colors.dart';
 
 class StatisticsView extends StatelessWidget {
   StatisticsView({super.key});
@@ -30,17 +33,17 @@ class ChartsTabBar extends StatelessWidget {
         Tab(
             icon: Icon(
           IcoFontIcons.chartPieAlt,
-          color: primaryColor,
+          color: AppColors.primaryColor,
         )),
-        Tab(icon: Icon(IcoFontIcons.chartBarGraph, color: primaryColor)),
+        Tab(
+            icon: Icon(IcoFontIcons.chartBarGraph,
+                color: AppColors.primaryColor)),
       ],
     );
   }
 }
 
 class Statistics extends StatelessWidget {
-  charts.ChartsType chartType = charts.ChartsType.monthlyPie;
-  bool showAllCategories = false;
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -48,7 +51,16 @@ class Statistics extends StatelessWidget {
       child: Scaffold(
         bottomNavigationBar: ChartsTabBar(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        floatingActionButton: Home.addExpenditureFloatingActionButton(context),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
+            // Add your onPressed code here!
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => AddExpenditureView()));
+          },
+          backgroundColor: AppColors.secondaryColor,
+          child: const Icon(Icons.add),
+        ),
         drawer: Home.appNavigationDrawer(context),
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.welcomeMessage),
@@ -99,7 +111,7 @@ class categoriesToDisplaySwitch extends StatelessWidget {
             // This bool value toggles the switch.
 
             value: showAllCategories,
-            activeColor: primaryColor,
+            activeColor: AppColors.primaryColor,
             onChanged: (bool value) {
               // This is called when the user toggles the switch.
               showAllCategories = value;

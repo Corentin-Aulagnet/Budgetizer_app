@@ -9,6 +9,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:budgetizer/Categories/view/categories_view.dart';
 
+import 'app_colors.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   DatabaseHandler databaseHandler = DatabaseHandler();
@@ -24,8 +26,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
         theme: ThemeData(
-            primarySwatch:
-                MaterialColor(primaryColor.value, primaryColorSwatch)),
+            primarySwatch: MaterialColor(
+                AppColors.primaryColor.value, AppColors.primaryColorSwatch)),
         localizationsDelegates: [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,

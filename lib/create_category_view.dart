@@ -129,7 +129,7 @@ class _CreateCategoryView extends State<CreateCategoryView> {
               name: name,
               descriptors: [],
             );
-      DatabaseHandler().saveCategory(categoryToAdd);
+      await DatabaseHandler().saveCategory(categoryToAdd);
     }
     return true;
   }

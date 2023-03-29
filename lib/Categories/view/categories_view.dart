@@ -1,4 +1,5 @@
 import 'package:budgetizer/Categories/blocs/categories_bloc.dart';
+import 'package:budgetizer/create_category_view.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/home.dart';
@@ -8,6 +9,8 @@ import 'package:budgetizer/Categories/view/clusters_tab.dart';
 import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:patterns_canvas/patterns_canvas.dart';
 
+import '../../app_colors.dart';
+
 class CategoriesView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -15,8 +18,7 @@ class CategoriesView extends StatelessWidget {
         create: (context) => CategoryViewBloc(clustersExpanded: []),
         child: Scaffold(
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-            floatingActionButton:
-                Home.addExpenditureFloatingActionButton(context),
+            floatingActionButton: AddCategoryFAB(),
             drawer: Home.appNavigationDrawer(context),
             appBar: AppBar(
               title: Text(AppLocalizations.of(context)!.welcomeMessage),
@@ -34,6 +36,22 @@ class CategoriesView extends StatelessWidget {
                 ),
               )
             ])));
+  }
+}
+
+class AddCategoryFAB extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      onPressed: () {
+        Navigator.push(context,
+                MaterialPageRoute(builder: (context) => CreateCategoryView()))
+            .then((_) => BlocProvider.of<CategoryViewBloc>(context)
+                .add(CategoryAdded()));
+      },
+      backgroundColor: AppColors.secondaryColor,
+      child: const Icon(Icons.add),
+    );
   }
 }
 
@@ -83,7 +101,9 @@ class DeleteTarget extends StatelessWidget {
               ));
         },
         onAccept: (item) {
-          showDeleteDialog(context, item);
+          showDeleteDialog(context, item, () {
+            BlocProvider.of<CategoryViewBloc>(context).add(CategoryDeleted());
+          });
         },
       );
     });

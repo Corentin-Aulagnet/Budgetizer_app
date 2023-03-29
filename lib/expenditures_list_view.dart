@@ -1,3 +1,4 @@
+import 'package:budgetizer/add_expenditure_view.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/expenditure_view.dart';
 import 'package:budgetizer/database_handler.dart';
@@ -5,6 +6,8 @@ import 'package:budgetizer/expenditure.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:budgetizer/home.dart';
+
+import 'app_colors.dart';
 
 class _ExpendituresState extends State<Expenditures> {
   late Future<List<Expenditure>> _dataFuture = DatabaseHandler().fetchData();
@@ -15,8 +18,19 @@ class _ExpendituresState extends State<Expenditures> {
         onRefresh: refreshView,
         child: Scaffold(
             floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-            floatingActionButton:
-                Home.addExpenditureFloatingActionButton(context),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
+                // Add your onPressed code here!
+                Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => AddExpenditureView()))
+                    .then((_) => refreshView());
+              },
+              backgroundColor: AppColors.secondaryColor,
+              child: const Icon(Icons.add),
+            ),
             drawer: Home.appNavigationDrawer(context),
             appBar: AppBar(
               title: Text(AppLocalizations.of(context)!.welcomeMessage),
