@@ -174,6 +174,13 @@ void showDeleteDialog(
             actions: <Widget>[
               TextButton(
                 onPressed: () async {
+                  //if has children put null as parent for each one of them
+                  for (CategoryDescriptor child in category.children) {
+                    child.parent = null;
+                  }
+                  //Update database
+                  await DatabaseHandler()
+                      .updateCategories(category.children.toList());
                   await DatabaseHandler().deleteCategory(category);
                   callback();
                   Navigator.of(context).pop();

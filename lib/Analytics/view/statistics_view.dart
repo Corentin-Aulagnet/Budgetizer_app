@@ -1,6 +1,6 @@
-import 'package:budgetizer/Expenses/add_expenditure_view.dart';
+import 'package:budgetizer/Expenses/view/add_expenditure_view.dart';
 import 'package:budgetizer/database_handler.dart';
-import 'package:budgetizer/Expenses/expenditure.dart';
+import 'package:budgetizer/Expenses/utils/expenditure.dart';
 import 'package:flutter/material.dart';
 import 'package:budgetizer/charts.dart' as charts;
 import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';

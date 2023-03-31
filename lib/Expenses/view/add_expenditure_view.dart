@@ -1,14 +1,16 @@
 import 'package:budgetizer/Categories/utils/category_utils.dart';
+import 'package:budgetizer/Expenses/blocs/expenses_bloc.dart';
 import 'package:budgetizer/database_handler.dart';
-import 'package:budgetizer/Expenses/expenditure.dart';
+import 'package:budgetizer/Expenses/utils/expenditure.dart';
 import 'package:flutter/material.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:budgetizer/Categories/view/create_category_view.dart';
 import 'package:searchable_listview/searchable_listview.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../app_colors.dart';
+import '../../app_colors.dart';
 
 class AddExpenditureView extends StatefulWidget {
   AddExpenditureView({super.key, Expenditure? expenditure}) {
@@ -146,7 +148,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
 
   @override
   Widget build(BuildContext context) {
-    DatabaseHandler().loadCategories();
+    //DatabaseHandler().loadCategories();
     FocusManager.instance.primaryFocus?.unfocus();
     return GestureDetector(
         onTap: () {
@@ -235,7 +237,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   }
 
   refresh() async {
-    await DatabaseHandler().loadCategories();
+    //await DatabaseHandler().loadCategories();
     setState(() {});
   }
 

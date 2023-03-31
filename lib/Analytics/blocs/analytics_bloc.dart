@@ -1,5 +1,5 @@
 import 'package:budgetizer/database_handler.dart';
-import 'package:budgetizer/Expenses/expenditure.dart';
+import 'package:budgetizer/Expenses/utils/expenditure.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:budgetizer/charts.dart' as charts;
 

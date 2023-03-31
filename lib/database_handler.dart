@@ -1,5 +1,5 @@
 import 'package:budgetizer/Categories/utils/category_utils.dart';
-import 'package:budgetizer/Expenses/expenditure.dart';
+import 'package:budgetizer/Expenses/utils/expenditure.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 //Only for dev purposes
@@ -188,7 +188,6 @@ class DatabaseHandler {
   Future<void> loadCategories() async {
     // Read the data from the database
     var data = await db.query(categoriesTableName);
-
     categoriesList.clear();
     //First create all the categories
     for (var row in data) {
@@ -203,12 +202,21 @@ class DatabaseHandler {
     for (var row in data) {
       if (row['parentId'] != '') {
         //This category has a parent
-        CategoryDescriptor parent =
-            matchCategory(int.parse(row['parentId'].toString()))!;
+        CategoryDescriptor? parent =
+            matchCategory(int.parse(row['parentId'].toString()));
         CategoryDescriptor child =
             matchCategory(int.parse(row['id'].toString()))!;
-        parent.addChild(child);
-        child.makeChildOf(parent);
+        if (parent != null) {
+          //ok, parent still exists in database
+          parent.addChild(child);
+          child.makeChildOf(parent);
+        } else {
+          //Something went wrong, parent does not exists anymore
+          //gives null as a parent
+          child.parent = null;
+          //update database
+          updateCategories([child]);
+        }
       }
     }
   }

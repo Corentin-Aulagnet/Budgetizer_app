@@ -68,9 +68,11 @@ class ClustersTab extends StatelessWidget {
                   ));
             },
             onAccept: (item) {
-              BlocProvider.of<CategoryViewBloc>(context).add(
-                  CategoryAncestryModified(
-                      currentCategory: item, newParent: cluster));
+              if (item.children.isEmpty) {
+                BlocProvider.of<CategoryViewBloc>(context).add(
+                    CategoryAncestryModified(
+                        currentCategory: item, newParent: cluster));
+              }
             },
           );
         }),
