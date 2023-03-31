@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/Expenses/utils/expenditure.dart';
+import '../../app_colors.dart';
 import 'indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +68,7 @@ class MontlhyBarChart extends StatelessWidget {
         Row(
           children: [
             Indicator(
-              color: colors[index],
+              color: AppColors.palette3[index],
               text: List.from(categoriesDisplayed)
                   .elementAt(index)
                   .getName(context),
@@ -166,7 +167,7 @@ class MontlhyBarChart extends StatelessWidget {
     }
     //Atribute a color for each categories that will be displayed
     for (int index = 0; index < List.from(categories).length; index++) {
-      categoryColor[List.from(categories)[index]] = colors[index];
+      categoryColor[List.from(categories)[index]] = AppColors.palette3[index];
     }
 
     List<BarChartGroupData> groups = List.empty(growable: true);
@@ -308,7 +309,7 @@ class YearlyPieState extends State<YearlyPie> {
         Row(
           children: [
             Indicator(
-              color: colors[index],
+              color: AppColors.palette3[index],
               text: data.keys.elementAt(index).getName(context),
               isSquare: true,
             ),
@@ -329,7 +330,7 @@ class YearlyPieState extends State<YearlyPie> {
       final fontSize = isTouched ? 16.0 : 10.0;
       final radius = isTouched ? 60.0 : 50.0;
       return PieChartSectionData(
-          color: colors[i],
+          color: AppColors.palette3[i],
           value: data.values.elementAt(i),
           title: data.keys.elementAt(i).getName(context),
           radius: radius,
@@ -490,7 +491,7 @@ class MonthlyPieState extends State<MonthlyPie> {
         Row(
           children: [
             Indicator(
-              color: colors[index],
+              color: AppColors.palette3[index],
               text: data.keys.elementAt(index).getName(context),
               isSquare: true,
             ),
@@ -511,7 +512,7 @@ class MonthlyPieState extends State<MonthlyPie> {
       final fontSize = isTouched ? 16.0 : 10.0;
       final radius = isTouched ? 60.0 : 50.0;
       return PieChartSectionData(
-          color: colors[i],
+          color: AppColors.palette3[i],
           value: data.values.elementAt(i),
           title: data.keys.elementAt(i).getName(context),
           radius: radius,
