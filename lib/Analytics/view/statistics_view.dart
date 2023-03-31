@@ -2,7 +2,7 @@ import 'package:budgetizer/Expenses/view/add_expenditure_view.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/Expenses/utils/expenditure.dart';
 import 'package:flutter/material.dart';
-import 'package:budgetizer/charts.dart' as charts;
+import '../utils/charts.dart' as charts;
 import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:budgetizer/home.dart';
@@ -27,9 +27,12 @@ class StatisticsView extends StatelessWidget {
 }
 
 class ChartsTabBar extends StatelessWidget {
+  TabController tabController;
+  ChartsTabBar({required this.tabController});
   @override
   Widget build(BuildContext context) {
-    return const TabBar(
+    return TabBar(
+      controller: tabController,
       tabs: [
         Tab(
             icon: Icon(
@@ -44,57 +47,79 @@ class ChartsTabBar extends StatelessWidget {
   }
 }
 
-class Statistics extends StatelessWidget {
+class Statistics extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => StatisticsState();
+}
+
+class StatisticsState extends State<Statistics>
+    with SingleTickerProviderStateMixin {
+  late TabController tabController;
+  @override
+  void initState() {
+    super.initState();
+    tabController = TabController(vsync: this, length: 2);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        bottomNavigationBar: ChartsTabBar(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
-            // Add your onPressed code here!
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => AddExpenditureView()));
-          },
-          backgroundColor: AppColors.secondaryColor,
-          child: const Icon(Icons.add),
-        ),
-        drawer: AppNavigationDrawer(),
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.welcomeMessage),
-        ),
-        body: TabBarView(children: [
-          BlocProvider(
-              create: (_) => PieChartBloc(),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    PieTypeChips(),
-                    Row(children: <Widget>[
-                      const SizedBox(
-                        width: 28,
-                      ),
-                      DateDropDownMenu(),
-                      categoriesToDisplaySwitch(),
-                    ]),
-                    SelectedPie(),
-                  ])),
-          BlocProvider(
-            create: (_) => BarChartBloc(),
-            child: SingleChildScrollView(
-                child: Column(children: [
-              const SizedBox(
-                width: 10,
-              ),
-              charts.MontlhyBarChart(),
-              MonthsMultiSelector()
-            ])),
-          )
-        ]),
+    return Scaffold(
+      bottomNavigationBar: TabBar(
+        controller: tabController,
+        tabs: const [
+          Tab(
+              icon: Icon(
+            IcoFontIcons.chartPieAlt,
+            color: AppColors.primaryColor,
+          )),
+          Tab(
+              icon: Icon(IcoFontIcons.chartBarGraph,
+                  color: AppColors.primaryColor)),
+        ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
+          // Add your onPressed code here!
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => AddExpenditureView()));
+        },
+        backgroundColor: AppColors.secondaryColor,
+        child: const Icon(Icons.add),
+      ),
+      drawer: AppNavigationDrawer(),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.welcomeMessage),
+      ),
+      body: TabBarView(controller: tabController, children: [
+        BlocProvider(
+            create: (_) => PieChartBloc(),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  PieTypeChips(),
+                  Row(children: <Widget>[
+                    const SizedBox(
+                      width: 28,
+                    ),
+                    DateDropDownMenu(),
+                    categoriesToDisplaySwitch(),
+                  ]),
+                  Expanded(child: SelectedPie()),
+                ])),
+        BlocProvider(
+          create: (_) => BarChartBloc(),
+          child: SingleChildScrollView(
+              child: Column(children: [
+            const SizedBox(
+              width: 10,
+            ),
+            charts.MontlhyBarChart(),
+            MonthsMultiSelector()
+          ])),
+        )
+      ]),
     );
   }
 }

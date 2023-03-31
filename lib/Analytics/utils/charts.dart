@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:budgetizer/Categories/utils/category_utils.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/Expenses/utils/expenditure.dart';
-import 'package:budgetizer/indicator.dart';
+import 'indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -11,13 +11,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
 
 class YearlyPie extends StatefulWidget {
-  YearlyPie({super.key});
+  double aspectRatio;
+  Axis alignment;
+  YearlyPie({super.key, this.aspectRatio = 1, this.alignment = Axis.vertical});
   @override
   State<StatefulWidget> createState() => YearlyPieState();
 }
 
 class MonthlyPie extends StatefulWidget {
-  MonthlyPie({super.key});
+  double aspectRatio;
+  Axis alignment;
+  MonthlyPie({super.key, this.aspectRatio = 1, this.alignment = Axis.vertical});
   @override
   State<StatefulWidget> createState() => MonthlyPieState();
 }
@@ -251,57 +255,49 @@ class YearlyPieState extends State<YearlyPie> {
       type = chartState.chartType;
       yearOnGraph = chartState.year.first.toString();
       displayAllCategories = chartState.showAllCategories;
-      return Column(children: [
-        Card(
-            color: Colors.white,
-            child: Column(
-              children: [
-                Row(
-                  children: <Widget>[
-                    const SizedBox(
-                      height: 18,
-                    ),
-                    Expanded(
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: PieChart(
-                          PieChartData(
-                            pieTouchData: PieTouchData(
-                              touchCallback:
-                                  (FlTouchEvent event, pieTouchResponse) {
-                                setState(() {
-                                  if (!event.isInterestedForInteractions ||
-                                      pieTouchResponse == null ||
-                                      pieTouchResponse.touchedSection == null) {
-                                    touchedIndex = -1;
-                                    return;
-                                  }
-                                  touchedIndex = pieTouchResponse
-                                      .touchedSection!.touchedSectionIndex;
-                                });
-                              },
-                            ),
-                            borderData: FlBorderData(
-                              show: false,
-                            ),
-                            sectionsSpace: 0,
-                            centerSpaceRadius: 80,
-                            sections: showingSections(),
-                          ),
-                        ),
+      return Card(
+          color: Colors.white,
+          child: Flex(
+            direction: widget.alignment,
+            children: [
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: widget.aspectRatio,
+                  child: PieChart(
+                    PieChartData(
+                      pieTouchData: PieTouchData(
+                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                          setState(() {
+                            if (!event.isInterestedForInteractions ||
+                                pieTouchResponse == null ||
+                                pieTouchResponse.touchedSection == null) {
+                              touchedIndex = -1;
+                              return;
+                            }
+                            touchedIndex = pieTouchResponse
+                                .touchedSection!.touchedSectionIndex;
+                          });
+                        },
                       ),
+                      borderData: FlBorderData(
+                        show: false,
+                      ),
+                      sectionsSpace: 0,
+                      centerSpaceRadius: 80,
+                      sections: showingSections(),
                     ),
-                  ],
+                  ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: showingIndicators(),
-                ),
-              ],
-            )),
-        /*Flexible(child: ListView(children: showingListTiles()))*/
-      ]);
+              ),
+              Wrap(
+                direction: flipAxis(widget.alignment),
+                spacing: 8.0, // Adjust as needed
+                runSpacing: 8.0, // Adjust as needed
+                //crossAxisAlignment: CrossAxisAlignment.start,
+                children: showingIndicators(),
+              )
+            ],
+          ));
     });
   }
 
@@ -441,57 +437,49 @@ class MonthlyPieState extends State<MonthlyPie> {
       monthOnGraph = chartState.month.first.toString();
       yearOnGraph = chartState.year.first.toString();
       displayAllCategories = chartState.showAllCategories;
-      return Column(children: [
-        Card(
-            color: Colors.white,
-            child: Column(
-              children: [
-                Row(
-                  children: <Widget>[
-                    const SizedBox(
-                      height: 18,
-                    ),
-                    Expanded(
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: PieChart(
-                          PieChartData(
-                            pieTouchData: PieTouchData(
-                              touchCallback:
-                                  (FlTouchEvent event, pieTouchResponse) {
-                                setState(() {
-                                  if (!event.isInterestedForInteractions ||
-                                      pieTouchResponse == null ||
-                                      pieTouchResponse.touchedSection == null) {
-                                    touchedIndex = -1;
-                                    return;
-                                  }
-                                  touchedIndex = pieTouchResponse
-                                      .touchedSection!.touchedSectionIndex;
-                                });
-                              },
-                            ),
-                            borderData: FlBorderData(
-                              show: false,
-                            ),
-                            sectionsSpace: 0,
-                            centerSpaceRadius: 80,
-                            sections: showingSections(),
-                          ),
-                        ),
+      return Card(
+          color: Colors.white,
+          child: Flex(
+            direction: widget.alignment,
+            children: [
+              Expanded(
+                child: AspectRatio(
+                  aspectRatio: widget.aspectRatio,
+                  child: PieChart(
+                    PieChartData(
+                      pieTouchData: PieTouchData(
+                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                          setState(() {
+                            if (!event.isInterestedForInteractions ||
+                                pieTouchResponse == null ||
+                                pieTouchResponse.touchedSection == null) {
+                              touchedIndex = -1;
+                              return;
+                            }
+                            touchedIndex = pieTouchResponse
+                                .touchedSection!.touchedSectionIndex;
+                          });
+                        },
                       ),
+                      borderData: FlBorderData(
+                        show: false,
+                      ),
+                      sectionsSpace: 0,
+                      centerSpaceRadius: 80,
+                      sections: showingSections(),
                     ),
-                  ],
+                  ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: showingIndicators(),
-                ),
-              ],
-            )),
-        /*Flexible(child: ListView(children: showingListTiles()))*/
-      ]);
+              ),
+              Wrap(
+                direction: flipAxis(widget.alignment),
+                spacing: 8.0, // Adjust as needed
+                runSpacing: 8.0, // Adjust as needed
+                //crossAxisAlignment: CrossAxisAlignment.start,
+                children: showingIndicators(),
+              )
+            ],
+          ));
     });
   }
 

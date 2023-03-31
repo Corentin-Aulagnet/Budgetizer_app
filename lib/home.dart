@@ -1,4 +1,4 @@
-import 'package:budgetizer/charts.dart';
+import 'Analytics/utils/charts.dart';
 import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
 import 'package:budgetizer/database_handler.dart';
 import 'package:flutter/material.dart';
@@ -80,7 +80,9 @@ class _HomeState extends State<Home> {
                     ),
                     textAlign: TextAlign.center,
                   )),
-                  MonthlyPie(),
+                  MonthlyPie(
+                    alignment: Axis.horizontal,
+                  ),
                   ListTile(
                     leading: Text(
                         DatabaseHandler.expendituresList[0].category.emoji),
@@ -98,7 +100,7 @@ class _HomeState extends State<Home> {
                         DatabaseHandler.expendituresList[1].category.emoji),
                     subtitle: Text(
                         '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(DatabaseHandler.expendituresList[1].date)} ${DatabaseHandler.expendituresList[1].value.toString()}€'),
-                  )
+                  ),
                 ],
               )));
     } else {

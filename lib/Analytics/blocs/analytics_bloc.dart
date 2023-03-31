@@ -1,7 +1,7 @@
 import 'package:budgetizer/database_handler.dart';
 import 'package:budgetizer/Expenses/utils/expenditure.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:budgetizer/charts.dart' as charts;
+import '../utils/charts.dart' as charts;
 
 class MonthDisplay {
   static final Map<int, String> intToStrMonths = {
