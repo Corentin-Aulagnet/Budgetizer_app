@@ -44,8 +44,12 @@ class AppNavigationDrawer extends StatelessWidget {
         // Everything from here down is bottom aligned in the drawer
         Divider(),
         ListTile(
+            leading: Icon(Icons.info_outlined),
+            title: const Text("About"), //TODO localization
+            onTap: () => Navigator.popAndPushNamed(context, '/About')),
+        ListTile(
             leading: Icon(Icons.settings),
-            title: const Text("Options"),
+            title: const Text("Options"), //TODO localization
             onTap: () => Navigator.popAndPushNamed(context, '/Options')),
       ],
     ));

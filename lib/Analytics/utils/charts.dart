@@ -438,49 +438,58 @@ class MonthlyPieState extends State<MonthlyPie> {
       monthOnGraph = chartState.month.first.toString();
       yearOnGraph = chartState.year.first.toString();
       displayAllCategories = chartState.showAllCategories;
-      return Card(
-          color: Colors.white,
-          child: Flex(
-            direction: widget.alignment,
-            children: [
-              Expanded(
-                child: AspectRatio(
-                  aspectRatio: widget.aspectRatio,
-                  child: PieChart(
-                    PieChartData(
-                      pieTouchData: PieTouchData(
-                        touchCallback: (FlTouchEvent event, pieTouchResponse) {
-                          setState(() {
-                            if (!event.isInterestedForInteractions ||
-                                pieTouchResponse == null ||
-                                pieTouchResponse.touchedSection == null) {
-                              touchedIndex = -1;
-                              return;
-                            }
-                            touchedIndex = pieTouchResponse
-                                .touchedSection!.touchedSectionIndex;
-                          });
-                        },
+      bool isThereData = getData().isNotEmpty;
+      if (isThereData) {
+        return Card(
+            color: Colors.white,
+            child: Flex(
+              direction: widget.alignment,
+              children: [
+                Expanded(
+                  child: AspectRatio(
+                    aspectRatio: widget.aspectRatio,
+                    child: PieChart(
+                      PieChartData(
+                        pieTouchData: PieTouchData(
+                          touchCallback:
+                              (FlTouchEvent event, pieTouchResponse) {
+                            setState(() {
+                              if (!event.isInterestedForInteractions ||
+                                  pieTouchResponse == null ||
+                                  pieTouchResponse.touchedSection == null) {
+                                touchedIndex = -1;
+                                return;
+                              }
+                              touchedIndex = pieTouchResponse
+                                  .touchedSection!.touchedSectionIndex;
+                            });
+                          },
+                        ),
+                        borderData: FlBorderData(
+                          show: false,
+                        ),
+                        sectionsSpace: 0,
+                        centerSpaceRadius: 80,
+                        sections: showingSections(),
                       ),
-                      borderData: FlBorderData(
-                        show: false,
-                      ),
-                      sectionsSpace: 0,
-                      centerSpaceRadius: 80,
-                      sections: showingSections(),
                     ),
                   ),
                 ),
-              ),
-              Wrap(
-                direction: flipAxis(widget.alignment),
-                spacing: 8.0, // Adjust as needed
-                runSpacing: 8.0, // Adjust as needed
-                //crossAxisAlignment: CrossAxisAlignment.start,
-                children: showingIndicators(),
-              )
-            ],
-          ));
+                Wrap(
+                  direction: flipAxis(widget.alignment),
+                  spacing: 8.0, // Adjust as needed
+                  runSpacing: 8.0, // Adjust as needed
+                  //crossAxisAlignment: CrossAxisAlignment.start,
+                  children: showingIndicators(),
+                )
+              ],
+            ));
+      } else {
+        return Card(
+            color: Colors.white,
+            child: Text(
+                "Oups no data to display, right now")); //TODO Localization //TODO add an cartoon image
+      }
     });
   }
 
