@@ -1,8 +1,8 @@
 import 'package:budgetizer/Categories/blocs/categories_bloc.dart';
 import 'package:budgetizer/Categories/view/create_category_view.dart';
-import 'package:budgetizer/database_handler.dart';
+
 import 'package:flutter/material.dart';
-import 'package:budgetizer/home.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:budgetizer/Categories/view/clusters_tab.dart';
