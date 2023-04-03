@@ -438,8 +438,8 @@ class MonthlyPieState extends State<MonthlyPie> {
       monthOnGraph = chartState.month.first.toString();
       yearOnGraph = chartState.year.first.toString();
       displayAllCategories = chartState.showAllCategories;
-      bool isThereData = getData().isNotEmpty;
-      if (isThereData) {
+      if (DatabaseHandler.dataInDateFilter(
+          DateTime(int.parse(yearOnGraph), int.parse(monthOnGraph)), 1)) {
         return Card(
             color: Colors.white,
             child: Flex(

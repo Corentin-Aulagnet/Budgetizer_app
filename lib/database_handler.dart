@@ -25,6 +25,22 @@ class DatabaseHandler {
   factory DatabaseHandler() {
     return _instance;
   }
+  static bool dataInDateFilter(DateTime date, int compareAs) {
+    if (compareAs == 0) {
+      return expendituresList
+          .where((element) => element.date.isAtSameMomentAs(date))
+          .isNotEmpty;
+    } else if (compareAs > 0) {
+      return expendituresList
+          .where((element) => element.date.isAfter(date))
+          .isNotEmpty;
+    } else {
+      return expendituresList
+          .where((element) => element.date.isBefore(date))
+          .isNotEmpty;
+    }
+  }
+
   static List<CategoryDescriptor> get clustersCategories =>
       List<CategoryDescriptor>.from(DatabaseHandler.categoriesList
           .where((element) => element.isCluster()));

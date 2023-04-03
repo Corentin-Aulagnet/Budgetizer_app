@@ -88,6 +88,8 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         key: UniqueKey(),
         //only keep the categories that don't have children -> child category or orphan
         //Clusters should not be accessible as a base category
+        autoFocusOnSearch:
+            false, //makes the widget not autofocused and not focus when the user select a category
         initialList: List<CategoryDescriptor>.from(DatabaseHandler
                 .categoriesList
                 .where((element) => element.children.isEmpty)) +
@@ -149,7 +151,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
   @override
   Widget build(BuildContext context) {
     //DatabaseHandler().loadCategories();
-    FocusManager.instance.primaryFocus?.unfocus();
+
     return GestureDetector(
         onTap: () {
           //called when the body of the screen is touched
