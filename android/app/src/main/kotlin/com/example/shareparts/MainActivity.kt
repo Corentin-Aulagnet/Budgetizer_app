@@ -1,4 +1,4 @@
-package com.example.budgetizer
+package com.ledgerstats.main
 
 import io.flutter.embedding.android.FlutterActivity
 

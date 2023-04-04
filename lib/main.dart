@@ -20,7 +20,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,6 @@ class MyApp extends StatelessWidget {
           '/Categories': (context) => CategoriesView(),
           '/Options': (context) => OptionsView(),
         });
-    //home: Home());
   }
 }
 

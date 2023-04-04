@@ -53,6 +53,7 @@ dependencies:
   flutter_bloc: ^8.1.1
   multiple_search_selection: ^2.4.5
   patterns_canvas: ^0.4.0
+  url_launcher: ^6.1.10
 dev_dependencies:
   flutter_test:
     sdk: flutter
