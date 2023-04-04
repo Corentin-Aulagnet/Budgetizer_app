@@ -1,14 +1,14 @@
-import 'Analytics/utils/charts.dart';
-import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
-import 'package:budgetizer/database_handler.dart';
+import 'package:ledgerstats/Analytics/utils/charts.dart';
+import 'package:ledgerstats/Analytics/blocs/analytics_bloc.dart';
+import 'package:ledgerstats/database_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'Expenses/view/add_expenditure_view.dart';
+import 'package:ledgerstats/Expenses/view/add_expenditure_view.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import 'app_colors.dart';
-import 'navigation_drawer.dart';
+import 'package:ledgerstats/app_colors.dart';
+import 'package:ledgerstats/navigation_drawer.dart';
 
 class AddExpenditureFloatingActionButton extends StatelessWidget {
   @override

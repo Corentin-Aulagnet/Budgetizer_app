@@ -1,20 +1,20 @@
-import 'package:budgetizer/Expenses/view/add_expenditure_view.dart';
+import 'package:ledgerstats/Expenses/view/add_expenditure_view.dart';
 import 'package:flutter/material.dart';
-import 'package:budgetizer/Expenses/view/expenditure_view.dart';
-import 'package:budgetizer/database_handler.dart';
-import 'package:budgetizer/Expenses/utils/expenditure.dart';
+import 'package:ledgerstats/Expenses/view/expenditure_view.dart';
+import 'package:ledgerstats/database_handler.dart';
+import 'package:ledgerstats/Expenses/utils/expenditure.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../blocs/expenses_bloc.dart';
-import '../../sorted_filtered_listview.dart';
-import '../../app_colors.dart';
-import '../../navigation_drawer.dart';
+import 'package:ledgerstats/Expenses/blocs/expenses_bloc.dart';
+import 'package:ledgerstats/sorted_filtered_listview.dart';
+import 'package:ledgerstats/app_colors.dart';
+import 'package:ledgerstats/navigation_drawer.dart';
 
 class _ExpendituresState extends State<Expenditures>
     with SingleTickerProviderStateMixin {
-  late Future<List<Expenditure>> _dataFuture = DatabaseHandler().fetchData();
+  //late Future<List<Expenditure>> _dataFuture = DatabaseHandler().fetchData();
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -24,12 +24,23 @@ class _ExpendituresState extends State<Expenditures>
     _controller = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
-      value: widget.expendFilters ? 1.0 : 0.0,
+      value: widget.isPopOutVisible ? 1.0 : 0.0,
     );
     _animation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(_controller);
+  }
+
+  void _togglePopOut() {
+    setState(() {
+      widget.isPopOutVisible = !widget.isPopOutVisible;
+      if (widget.isPopOutVisible) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
   }
 
   @override
@@ -56,88 +67,96 @@ class _ExpendituresState extends State<Expenditures>
               actions: [
                 IconButton(
                     onPressed: () {
-                      setState(() {
-                        widget.expendFilters = !widget.expendFilters;
-                        widget.expendFilters
-                            ? _controller.reverse()
-                            : _controller.forward();
-                      });
+                      _togglePopOut();
                     },
                     icon: Icon(Icons.filter_list))
               ],
               title: Text(AppLocalizations.of(context)!.welcomeMessage),
             ),
             key: UniqueKey(),
-            body: Column(children: [
-              Expanded(
-                  child: Stack(children: [
-                BlocBuilder<ExpenseFilterBloc, ExpenseFilterState>(
-                    builder: (context, state) {
-                  List<Expenditure> filteredList =
-                      List.from(DatabaseHandler.expendituresList.where(
-                    (Expenditure element) {
-                      //on date
-                      bool fromDateOk = true;
-                      if (state.fromDate != null) {
-                        //fromDate is before or same moment as element.date
-                        fromDateOk =
-                            state.fromDate!.compareTo(element.date) <= 0;
-                      }
-                      bool toDateOk = true;
-                      if (state.toDate != null) {
-                        //fromDate is after or same moment as element.date
-                        toDateOk = state.toDate!.compareTo(element.date) >= 0;
-                      }
-                      //on category
-                      bool categoryFilter = true;
-                      if (state.categoriesInFilter.isNotEmpty) {
-                        categoryFilter =
-                            state.categoriesInFilter.contains(element.category);
-                      }
-                      return categoryFilter && fromDateOk && toDateOk;
-                    },
-                  ));
-                  return ListView.builder(
-                      itemCount: filteredList.length,
-                      itemBuilder: (context, index) {
-                        Expenditure row = filteredList[index];
-                        return ListTile(
-                          title: Text(
-                              '${row.title} | ${row.category.getName(context)}',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold)),
-                          trailing: Text(row.category.emoji),
-                          subtitle: Text(
-                              '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(row.date)} ${row.value.toString()}€'),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      ExpenditureView(expenditure: row)),
-                            ).then((_) => refreshView());
-                          },
-                        );
-                      });
-                }),
-                ScaleTransition(
-                  alignment: Alignment.topLeft,
-                  scale: _animation,
-                  child: FilterPanel(widget.expenseFilterBloc,
-                      checkedCategories: widget.categoriesFiltered),
-                )
-              ]))
-            ])));
+            body: GestureDetector(
+                onTap: () {
+                  if (widget.isPopOutVisible) {
+                    _togglePopOut();
+                  }
+                },
+                child: Column(children: [
+                  Expanded(
+                      child: Stack(children: [
+                    BlocBuilder<ExpenseFilterBloc, ExpenseFilterState>(
+                        builder: (context, state) {
+                      List<Expenditure> filteredList =
+                          List.from(DatabaseHandler.expendituresList.where(
+                        (Expenditure element) {
+                          //on date
+                          bool fromDateOk = true;
+                          if (state.fromDate != null) {
+                            //fromDate is before or same moment as element.date
+                            fromDateOk =
+                                state.fromDate!.compareTo(element.date) <= 0;
+                          }
+                          bool toDateOk = true;
+                          if (state.toDate != null) {
+                            //fromDate is after or same moment as element.date
+                            toDateOk =
+                                state.toDate!.compareTo(element.date) >= 0;
+                          }
+                          //on category
+                          bool categoryFilter = true;
+                          if (state.categoriesInFilter.isNotEmpty) {
+                            categoryFilter = state.categoriesInFilter
+                                .contains(element.category);
+                          }
+                          return categoryFilter && fromDateOk && toDateOk;
+                        },
+                      ));
+                      return ListView.builder(
+                          itemCount: filteredList.length,
+                          itemBuilder: (context, index) {
+                            Expenditure row = filteredList[index];
+                            return ListTile(
+                              title: Text(
+                                  '${row.title} | ${row.category.getName(context)}',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              trailing: Text(row.category.emoji),
+                              subtitle: Text(
+                                  '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(row.date)} ${row.value.toString()}€'),
+                              onTap: () {
+                                if (!widget.isPopOutVisible) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ExpenditureView(expenditure: row)),
+                                  ).then((_) => refreshView());
+                                } else {
+                                  _togglePopOut();
+                                }
+                              },
+                            );
+                          });
+                    }),
+                    Align(
+                        alignment: Alignment.topRight,
+                        child: ScaleTransition(
+                          alignment: Alignment.topRight,
+                          scale: _animation,
+                          child: FilterPanel(widget.expenseFilterBloc,
+                              checkedCategories: widget.categoriesFiltered),
+                        ))
+                  ]))
+                ]))));
   }
 
   Future<void> refreshView() => Future(() {
-        _dataFuture = DatabaseHandler().fetchData();
+        //_dataFuture = DatabaseHandler().fetchData();
         setState(() {});
       });
 }
 
 class Expenditures extends StatefulWidget {
-  bool expendFilters = false;
+  bool isPopOutVisible = false;
   List<bool> categoriesFiltered =
       List.filled(DatabaseHandler.categoriesList.length, false);
   ExpenseFilterBloc expenseFilterBloc =

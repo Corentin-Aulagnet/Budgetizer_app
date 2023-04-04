@@ -1,15 +1,15 @@
-import 'package:budgetizer/Expenses/view/expenditures_list_view.dart';
-import 'package:budgetizer/options_view.dart';
-import 'package:budgetizer/Analytics/view/statistics_view.dart';
+import 'package:ledgerstats/Expenses/view/expenditures_list_view.dart';
+import 'package:ledgerstats/options_view.dart';
+import 'package:ledgerstats/Analytics/view/statistics_view.dart';
 import 'package:flutter/material.dart';
-import 'package:budgetizer/home.dart';
-import 'package:budgetizer/database_handler.dart';
+import 'package:ledgerstats/home.dart';
+import 'package:ledgerstats/database_handler.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:budgetizer/Categories/view/categories_view.dart';
+import 'package:ledgerstats/Categories/view/categories_view.dart';
 import 'package:flutter/services.dart';
-import 'app_colors.dart';
+import 'package:ledgerstats/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

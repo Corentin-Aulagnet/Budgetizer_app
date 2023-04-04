@@ -1,15 +1,15 @@
 import 'dart:math';
 
-import 'package:budgetizer/Categories/utils/category_utils.dart';
-import 'package:budgetizer/database_handler.dart';
-import 'package:budgetizer/Expenses/utils/expenditure.dart';
-import '../../app_colors.dart';
-import 'indicator.dart';
+import 'package:ledgerstats/Categories/utils/category_utils.dart';
+import 'package:ledgerstats/database_handler.dart';
+import 'package:ledgerstats/Expenses/utils/expenditure.dart';
+import 'package:ledgerstats/app_colors.dart';
+import 'package:ledgerstats/Analytics/utils/indicator.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
+import 'package:ledgerstats/Analytics/blocs/analytics_bloc.dart';
 
 class YearlyPie extends StatefulWidget {
   double aspectRatio;

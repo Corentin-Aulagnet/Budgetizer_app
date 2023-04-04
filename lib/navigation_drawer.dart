@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'package:ledgerstats/app_colors.dart';
 
 class AppNavigationDrawer extends StatelessWidget {
   @override
@@ -43,10 +43,33 @@ class AppNavigationDrawer extends StatelessWidget {
         Spacer(), // <-- This will fill up any free-space
         // Everything from here down is bottom aligned in the drawer
         Divider(),
-        ListTile(
-            leading: Icon(Icons.info_outlined),
-            title: const Text("About"), //TODO localization
-            onTap: () => Navigator.popAndPushNamed(context, '/About')),
+        AboutListTile(
+            icon: const Icon(Icons.info),
+            applicationIcon: const FlutterLogo(),
+            applicationName: 'Show About Example',
+            applicationVersion: 'August 2019',
+            applicationLegalese: '\u{a9} 2014 The Flutter Authors',
+            aboutBoxChildren: <Widget>[
+              const SizedBox(height: 24),
+              RichText(
+                  text: TextSpan(
+                children: <TextSpan>[
+                  TextSpan(
+                      style: Theme.of(context).textTheme.bodyMedium!,
+                      text:
+                          "Flutter is Google's UI toolkit for building beautiful, "
+                          'natively compiled applications for mobile, web, and desktop '
+                          'from a single codebase. Learn more about Flutter at '),
+                  TextSpan(
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: Theme.of(context).colorScheme.primary),
+                      text: 'https://flutter.dev'),
+                  TextSpan(
+                      style: Theme.of(context).textTheme.bodyMedium!,
+                      text: '.'),
+                ],
+              ))
+            ]),
         ListTile(
             leading: Icon(Icons.settings),
             title: const Text("Options"), //TODO localization

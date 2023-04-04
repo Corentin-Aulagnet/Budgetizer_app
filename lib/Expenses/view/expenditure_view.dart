@@ -1,9 +1,9 @@
-import 'package:budgetizer/Categories/utils/category_utils.dart';
-import 'package:budgetizer/database_handler.dart';
+import 'package:ledgerstats/Categories/utils/category_utils.dart';
+import 'package:ledgerstats/database_handler.dart';
 import 'package:flutter/material.dart';
 import '../utils/expenditure.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:budgetizer/Expenses/view/add_expenditure_view.dart';
+import 'package:ledgerstats/Expenses/view/add_expenditure_view.dart';
 
 class ExpenditureView extends StatefulWidget {
   Expenditure expenditure;

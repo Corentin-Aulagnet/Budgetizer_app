@@ -1,12 +1,12 @@
-import 'package:budgetizer/Categories/blocs/categories_bloc.dart';
-import 'package:budgetizer/Categories/view/create_category_view.dart';
+import 'package:ledgerstats/Categories/blocs/categories_bloc.dart';
+import 'package:ledgerstats/Categories/view/create_category_view.dart';
 
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:budgetizer/Categories/view/clusters_tab.dart';
-import 'package:budgetizer/Categories/utils/category_utils.dart';
+import 'package:ledgerstats/Categories/view/clusters_tab.dart';
+import 'package:ledgerstats/Categories/utils/category_utils.dart';
 import 'package:patterns_canvas/patterns_canvas.dart';
 
 import '../../app_colors.dart';

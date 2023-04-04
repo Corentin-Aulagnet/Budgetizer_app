@@ -1,4 +1,4 @@
-name: budgetizer
+name: ledgerstats
 description: A project to develop an open source project to keep count of where your money goes.
 
 # The following line prevents the package from being accidentally published to

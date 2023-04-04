@@ -1,4 +1,4 @@
-import 'package:budgetizer/Categories/utils/category_utils.dart';
+import 'package:ledgerstats/Categories/utils/category_utils.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -1,9 +1,9 @@
-import 'package:budgetizer/Expenses/view/add_expenditure_view.dart';
-import 'package:budgetizer/database_handler.dart';
-import 'package:budgetizer/Expenses/utils/expenditure.dart';
+import 'package:ledgerstats/Expenses/view/add_expenditure_view.dart';
+import 'package:ledgerstats/database_handler.dart';
+import 'package:ledgerstats/Expenses/utils/expenditure.dart';
 import 'package:flutter/material.dart';
-import '../utils/charts.dart' as charts;
-import 'package:budgetizer/Analytics/blocs/analytics_bloc.dart';
+import 'package:ledgerstats/Analytics/utils/charts.dart' as charts;
+import 'package:ledgerstats/Analytics/blocs/analytics_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';

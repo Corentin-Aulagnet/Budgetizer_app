@@ -1,5 +1,5 @@
-import 'package:budgetizer/Categories/utils/category_utils.dart';
-import 'package:budgetizer/Expenses/utils/expenditure.dart';
+import 'package:ledgerstats/Categories/utils/category_utils.dart';
+import 'package:ledgerstats/Expenses/utils/expenditure.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 //Only for dev purposes
@@ -134,6 +134,7 @@ class DatabaseHandler {
       await db.update(expensesTableName, mapToInsert,
           where: 'id = ?', whereArgs: [expenditure.dataBaseId]);
     }
+    expendituresList = await fetchData();
   }
 
   Future<void> deleteExpense(Expenditure exp) async {
