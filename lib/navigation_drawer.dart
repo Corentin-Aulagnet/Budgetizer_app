@@ -41,7 +41,8 @@ class AppNavigationDrawer extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          currentAccountPicture: FlutterLogo(),
+          currentAccountPicture:
+              Image(image: AssetImage('assets/icon/icon_launcher.png')),
         ),
         ListTile(
             leading: const Icon(Icons.home),
@@ -64,7 +65,8 @@ class AppNavigationDrawer extends StatelessWidget {
         Divider(),
         AboutListTile(
             icon: const Icon(Icons.info),
-            applicationIcon: const FlutterLogo(),
+            applicationIcon:
+                const Image(image: AssetImage('assets/icon/icon_launcher.png')),
             applicationName: 'LedgerStats',
             applicationVersion: '1.0.0 April 2023', //TODO localization
             applicationLegalese: '\u{a9} 2023 Corentin Aulagnet',
