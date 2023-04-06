@@ -99,6 +99,11 @@ class DatabaseHandler {
     return expendituresList;
   }
 
+  Future<void> fetchAll() async {
+    fetchData();
+    loadCategories();
+  }
+
   Future<List<String>> fetchDates() async {
     var data = await db.query(expensesTableName,
         columns: ['date'], orderBy: "date DESC", groupBy: 'date');
@@ -160,6 +165,7 @@ class DatabaseHandler {
         .delete(categoriesTableName, where: 'id = ?', whereArgs: [categoryID]);
     await db.update(expensesTableName, {'categoryID': '-1'},
         where: 'categoryID = ?', whereArgs: [categoryID]);
+    expendituresList = await fetchData();
   }
 
   Future<void> saveCategory(CategoryDescriptor category) async {
