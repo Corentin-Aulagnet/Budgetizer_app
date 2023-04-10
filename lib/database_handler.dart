@@ -77,6 +77,18 @@ class DatabaseHandler {
     await fetchData();
   }
 
+  Future<Expenditure> getExpense(int id) async {
+    var row = (await db
+        .query(expensesTableName, where: 'id = ?', whereArgs: ['$id']))[0];
+    return Expenditure(
+        dataBaseId: int.parse(row['id'].toString()),
+        title: row['title'].toString(),
+        category: matchCategory(int.parse(row['categoryID'].toString())) ??
+            CategoryDescriptor.error(),
+        value: double.parse(row['value'].toString()),
+        date: DateTime.parse(row['date'].toString()));
+  }
+
   Future<List<Expenditure>> fetchData() async {
     // Open the database
     /*Database db = await openDatabase(

@@ -82,7 +82,7 @@ class _ExpendituresState extends State<Expenditures>
               title: Text(AppLocalizations.of(context)!.welcomeMessage),
             ),
             key: UniqueKey(),
-            body: FutureBuilder(
+            body: FutureBuilder<Data>(
               future: _dataFuture,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -143,7 +143,7 @@ class _ExpendituresState extends State<Expenditures>
                                           MaterialPageRoute(
                                               builder: (context) =>
                                                   ExpenditureView(
-                                                      expenditure: row)),
+                                                      id: row.dataBaseId)),
                                         ).then((_) => refreshView());
                                       } else {
                                         _togglePopOut();
