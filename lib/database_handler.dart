@@ -2,7 +2,13 @@ import 'package:ledgerstats/Categories/utils/category_utils.dart';
 import 'package:ledgerstats/Expenses/utils/expenditure.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-//Only for dev purposes
+
+class Data {
+  final List<CategoryDescriptor> categories;
+  final List<Expenditure> expenses;
+
+  const Data({required this.expenses, required this.categories});
+}
 
 class DatabaseHandler {
   static String databaseName = 'my_database.db';
@@ -25,6 +31,7 @@ class DatabaseHandler {
   factory DatabaseHandler() {
     return _instance;
   }
+
   static bool dataInDateFilter(DateTime date, int compareAs) {
     if (compareAs == 0) {
       return expendituresList
@@ -97,6 +104,12 @@ class DatabaseHandler {
     }
     // Return the data
     return expendituresList;
+  }
+
+  Future<Data> getData() async {
+    List<Expenditure> exp = await fetchData();
+    List<CategoryDescriptor> cat = await loadCategories();
+    return Data(categories: cat, expenses: exp);
   }
 
   Future<void> fetchAll() async {
@@ -208,7 +221,7 @@ class DatabaseHandler {
     }
   }
 
-  Future<void> loadCategories() async {
+  Future<List<CategoryDescriptor>> loadCategories() async {
     // Read the data from the database
     var data = await db.query(categoriesTableName);
     categoriesList.clear();
@@ -242,6 +255,7 @@ class DatabaseHandler {
         }
       }
     }
+    return categoriesList;
   }
 
   static CategoryDescriptor? matchCategory(int id) {

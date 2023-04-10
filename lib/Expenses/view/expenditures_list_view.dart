@@ -14,7 +14,7 @@ import 'package:ledgerstats/navigation_drawer.dart';
 
 class _ExpendituresState extends State<Expenditures>
     with SingleTickerProviderStateMixin {
-  final Future<List<Expenditure>> _dataFuture = DatabaseHandler().fetchData();
+  final Future<Data> _dataFuture = DatabaseHandler().getData();
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -98,7 +98,7 @@ class _ExpendituresState extends State<Expenditures>
                           BlocBuilder<ExpenseFilterBloc, ExpenseFilterState>(
                               builder: (context, state) {
                             List<Expenditure> filteredList =
-                                List.from(snapshot.data!.where(
+                                List.from(snapshot.data!.expenses.where(
                               (Expenditure element) {
                                 //on date
                                 bool fromDateOk = true;
@@ -171,7 +171,7 @@ class _ExpendituresState extends State<Expenditures>
   }
 
   Future<void> refreshView() => Future(() {
-        DatabaseHandler().fetchAll();
+        //DatabaseHandler().fetchAll();
         setState(() {});
       });
 }
