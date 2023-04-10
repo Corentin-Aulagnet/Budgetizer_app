@@ -1,3 +1,4 @@
+import 'package:ledgerstats/Categories/utils/category_utils.dart';
 import 'package:ledgerstats/Expenses/blocs/expenses_bloc.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
@@ -81,12 +82,14 @@ class SortedFilteredListViewState<T> extends State<SortedFilteredListView>
 
 class FilterPanel extends StatefulWidget {
   List<bool> checkedCategories;
+  List<CategoryDescriptor> categories;
   DateTime? fromDate;
   DateTime? toDate;
   AnimationController controller;
   Animation<double> animation;
   FilterPanel(ExpenseFilterBloc bloc,
       {required this.checkedCategories,
+      required this.categories,
       required this.controller,
       required this.animation}) {
     fromDate = bloc.fromDate;
@@ -120,11 +123,10 @@ class FilterPanelState extends State<FilterPanel>
                       onPressed: () {
                         BlocProvider.of<ExpenseFilterBloc>(context).add(
                             AddAllToFilter(
-                                categories:
-                                    List.from(DatabaseHandler.categoriesList)));
+                                categories: List.from(widget.categories)));
                         setState(() {
-                          widget.checkedCategories = List.filled(
-                              DatabaseHandler.categoriesList.length, true);
+                          widget.checkedCategories =
+                              List.filled(widget.categories.length, true);
                         });
                       },
                       child: Text("Select all")), //TODO localization
@@ -133,8 +135,8 @@ class FilterPanelState extends State<FilterPanel>
                         BlocProvider.of<ExpenseFilterBloc>(context)
                             .add(RemoveAllFromFilter());
                         setState(() {
-                          widget.checkedCategories = List.filled(
-                              DatabaseHandler.categoriesList.length, false);
+                          widget.checkedCategories =
+                              List.filled(widget.categories.length, false);
                         });
                       },
                       child: Text("Deselect all")) //TODO localization
@@ -144,7 +146,7 @@ class FilterPanelState extends State<FilterPanel>
                   height: 250,
                   child: ListView.builder(
                     physics: AlwaysScrollableScrollPhysics(),
-                    itemCount: DatabaseHandler.categoriesList.length,
+                    itemCount: widget.categories.length,
                     itemBuilder: (context, index) {
                       return CheckboxListTile(
                         value: widget.checkedCategories[index],
@@ -152,20 +154,18 @@ class FilterPanelState extends State<FilterPanel>
                           if (value!) {
                             BlocProvider.of<ExpenseFilterBloc>(context).add(
                                 AddToFilter(
-                                    category:
-                                        DatabaseHandler.categoriesList[index]));
+                                    category: widget.categories[index]));
                           } else {
                             BlocProvider.of<ExpenseFilterBloc>(context).add(
                                 RemoveFromFilter(
-                                    category:
-                                        DatabaseHandler.categoriesList[index]));
+                                    category: widget.categories[index]));
                           }
                           setState(() {
                             widget.checkedCategories[index] = value;
                           });
                         },
                         title: Text(
-                            '${DatabaseHandler.categoriesList[index].emoji}${DatabaseHandler.categoriesList[index].name}'),
+                            '${widget.categories[index].emoji}${widget.categories[index].name}'),
                       );
                     },
                   )),

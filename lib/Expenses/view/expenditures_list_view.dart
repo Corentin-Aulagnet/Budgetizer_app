@@ -156,6 +156,7 @@ class _ExpendituresState extends State<Expenditures>
                             alignment: Alignment.topRight,
                             child: FilterPanel(
                               widget.expenseFilterBloc,
+                              categories: snapshot.data!.categories,
                               checkedCategories: widget.categoriesFiltered,
                               animation: _animation,
                               controller: _controller,
