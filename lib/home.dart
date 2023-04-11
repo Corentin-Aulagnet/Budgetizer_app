@@ -95,9 +95,10 @@ class _HomeState extends State<Home> {
                           MonthlyPie(
                             alignment: Axis.horizontal,
                           ),
-                          ListView.builder(
-                            itemCount: min(snapshot.data!.expenses.length, 2),
-                            itemBuilder: (context, index) {
+                          Column(
+                              children: List.generate(
+                            min(snapshot.data!.expenses.length, 2),
+                            (index) {
                               return ListTile(
                                 leading: Text(snapshot
                                     .data!.expenses[index].category.emoji),
@@ -109,7 +110,7 @@ class _HomeState extends State<Home> {
                                     '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(snapshot.data!.expenses[index].date)} ${snapshot.data!.expenses[index].value.toString()}€'),
                               );
                             },
-                          )
+                          ))
                         ],
                       )));
             } else {
