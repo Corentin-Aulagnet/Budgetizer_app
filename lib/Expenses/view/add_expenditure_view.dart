@@ -72,7 +72,8 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
       onChanged: (String? value) {
         // This optional block of code can be used to run
         // code when the user saves the form.
-        if (value != null) widget.expenditure.value = double.parse(value);
+        if (value != null)
+          widget.expenditure.value = value != '' ? double.parse(value) : 0.0;
       },
       validator: (String? value) {
         return (value != null &&

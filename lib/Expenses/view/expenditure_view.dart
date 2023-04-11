@@ -21,7 +21,6 @@ class ExpenditureViewState extends State<ExpenditureView> {
   @override
   void initState() {
     super.initState();
-
     _expenseFuture.then((value) => _expense = value);
   }
 
@@ -88,10 +87,10 @@ class ExpenditureViewState extends State<ExpenditureView> {
                   MaterialPageRoute(
                       builder: (context) => AddExpenditureView(
                             expenditure: _expense,
-                          ))).then((_) {
-                setState(() {
-                  _expenseFuture = DatabaseHandler().getExpense(widget.id);
-                });
+                          ))).then((_) async {
+                _expenseFuture = DatabaseHandler().getExpense(widget.id);
+                _expenseFuture.then((value) => _expense = value);
+                setState(() {});
               });
             },
             heroTag: "modifyFAB",
@@ -127,11 +126,12 @@ class ExpenditureViewState extends State<ExpenditureView> {
                         margin: const EdgeInsets.only(top: 30),
                         child: Row(children: [
                           Expanded(
-                              child: Center(child: Text('${_expense.value}€'))),
+                              child: Center(
+                                  child: Text('${snapshot.data!.value}€'))),
                           Expanded(
                               child: Center(
                                   child: Text(
-                                      '${_expense.date.day.toString().padLeft(2, '0')}/${_expense.date.month.toString().padLeft(2, '0')}/${_expense.date.year.toString().padLeft(2, '0')}')))
+                                      '${snapshot.data!.date.day.toString().padLeft(2, '0')}/${_expense.date.month.toString().padLeft(2, '0')}/${_expense.date.year.toString().padLeft(2, '0')}')))
                         ]),
                       ),
                       Expanded(
