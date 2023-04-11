@@ -1,3 +1,4 @@
+import 'package:ledgerstats/Categories/utils/category_utils.dart';
 import 'package:ledgerstats/Expenses/blocs/expenses_bloc.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
@@ -69,8 +70,9 @@ class SortedFilteredListViewState<T> extends State<SortedFilteredListView>
           ScaleTransition(
             alignment: Alignment.topLeft,
             scale: _animation,
-            child: FilterPanel(ExpenseFilterBloc(categoriesInFilter: []),
-                checkedCategories: []),
+            child: /*FilterPanel(ExpenseFilterBloc(categoriesInFilter: []),
+                checkedCategories: [])*/
+                null,
           )
         ],
       ))
@@ -80,9 +82,16 @@ class SortedFilteredListViewState<T> extends State<SortedFilteredListView>
 
 class FilterPanel extends StatefulWidget {
   List<bool> checkedCategories;
+  List<CategoryDescriptor> categories;
   DateTime? fromDate;
   DateTime? toDate;
-  FilterPanel(ExpenseFilterBloc bloc, {required this.checkedCategories}) {
+  AnimationController controller;
+  Animation<double> animation;
+  FilterPanel(ExpenseFilterBloc bloc,
+      {required this.checkedCategories,
+      required this.categories,
+      required this.controller,
+      required this.animation}) {
     fromDate = bloc.fromDate;
     toDate = bloc.toDate;
   }
@@ -91,124 +100,132 @@ class FilterPanel extends StatefulWidget {
   FilterPanelState createState() => FilterPanelState();
 }
 
-class FilterPanelState extends State<FilterPanel> {
+class FilterPanelState extends State<FilterPanel>
+    with SingleTickerProviderStateMixin {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-        height: 450,
-        width: 300,
-        child: Card(
-            child: Column(children: [
-          Row(
-            children: [
-              TextButton(
-                  onPressed: () {
-                    BlocProvider.of<ExpenseFilterBloc>(context).add(
-                        AddAllToFilter(
-                            categories:
-                                List.from(DatabaseHandler.categoriesList)));
-                    setState(() {
-                      widget.checkedCategories = List.filled(
-                          DatabaseHandler.categoriesList.length, true);
-                    });
-                  },
-                  child: Text("Select all")), //TODO localization
-              TextButton(
-                  onPressed: () {
-                    BlocProvider.of<ExpenseFilterBloc>(context)
-                        .add(RemoveAllFromFilter());
-                    setState(() {
-                      widget.checkedCategories = List.filled(
-                          DatabaseHandler.categoriesList.length, false);
-                    });
-                  },
-                  child: Text("Deselect all")) //TODO localization
-            ],
-          ),
-          Container(
-              height: 250,
-              child: ListView.builder(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: DatabaseHandler.categoriesList.length,
-                itemBuilder: (context, index) {
-                  return CheckboxListTile(
-                    value: widget.checkedCategories[index],
-                    onChanged: (bool? value) {
-                      if (value!) {
+    return ScaleTransition(
+        alignment: Alignment.topRight,
+        scale: widget.animation,
+        child: SizedBox(
+            height: 450,
+            width: 300,
+            child: Card(
+                child: Column(children: [
+              Row(
+                children: [
+                  TextButton(
+                      onPressed: () {
                         BlocProvider.of<ExpenseFilterBloc>(context).add(
-                            AddToFilter(
-                                category:
-                                    DatabaseHandler.categoriesList[index]));
-                      } else {
-                        BlocProvider.of<ExpenseFilterBloc>(context).add(
-                            RemoveFromFilter(
-                                category:
-                                    DatabaseHandler.categoriesList[index]));
-                      }
-                      setState(() {
-                        widget.checkedCategories[index] = value;
-                      });
+                            AddAllToFilter(
+                                categories: List.from(widget.categories)));
+                        setState(() {
+                          widget.checkedCategories =
+                              List.filled(widget.categories.length, true);
+                        });
+                      },
+                      child: Text("Select all")), //TODO localization
+                  TextButton(
+                      onPressed: () {
+                        BlocProvider.of<ExpenseFilterBloc>(context)
+                            .add(RemoveAllFromFilter());
+                        setState(() {
+                          widget.checkedCategories =
+                              List.filled(widget.categories.length, false);
+                        });
+                      },
+                      child: Text("Deselect all")) //TODO localization
+                ],
+              ),
+              Container(
+                  height: 250,
+                  child: ListView.builder(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    itemCount: widget.categories.length,
+                    itemBuilder: (context, index) {
+                      return CheckboxListTile(
+                        value: widget.checkedCategories[index],
+                        onChanged: (bool? value) {
+                          if (value!) {
+                            BlocProvider.of<ExpenseFilterBloc>(context).add(
+                                AddToFilter(
+                                    category: widget.categories[index]));
+                          } else {
+                            BlocProvider.of<ExpenseFilterBloc>(context).add(
+                                RemoveFromFilter(
+                                    category: widget.categories[index]));
+                          }
+                          setState(() {
+                            widget.checkedCategories[index] = value;
+                          });
+                        },
+                        title: Text(
+                            '${widget.categories[index].emoji}${widget.categories[index].name}'),
+                      );
                     },
-                    title: Text(
-                        '${DatabaseHandler.categoriesList[index].emoji}${DatabaseHandler.categoriesList[index].name}'),
-                  );
-                },
-              )),
-          Divider(),
-          Column(children: [
-            Row(
-              children: [
-                Text('from'), //TODO localization
-                Expanded(
-                    child: DateTimeField(
-                  textAlign: TextAlign.right,
-                  initialValue: widget.fromDate,
-                  format: DateFormat.yMd(
-                      Localizations.localeOf(context).languageCode),
-                  onShowPicker: (context, currentValue) {
-                    return showDatePicker(
-                        context: context,
-                        firstDate: DateTime(1900),
-                        initialDate: currentValue == DatabaseHandler.defaultDate
-                            ? DateTime.now()
-                            : currentValue ?? DateTime.now(),
-                        lastDate: DateTime(2100));
-                  },
-                  onChanged: (DateTime? currentValue) {
-                    widget.fromDate = currentValue;
-                    BlocProvider.of<ExpenseFilterBloc>(context)
-                        .add(ChangeFromDate(date: currentValue));
-                  },
-                )),
-              ],
-            ),
-            Row(
-              children: [
-                Text('to'), //TODO localization
-                Expanded(
-                    child: DateTimeField(
-                  textAlign: TextAlign.right,
-                  initialValue: widget.toDate,
-                  format: DateFormat.yMd(
-                      Localizations.localeOf(context).languageCode),
-                  onShowPicker: (context, currentValue) {
-                    return showDatePicker(
-                        context: context,
-                        firstDate: DateTime(1900),
-                        initialDate: currentValue == DatabaseHandler.defaultDate
-                            ? DateTime.now()
-                            : currentValue ?? DateTime.now(),
-                        lastDate: DateTime(2100));
-                  },
-                  onChanged: (DateTime? currentValue) {
-                    widget.toDate = currentValue;
-                    BlocProvider.of<ExpenseFilterBloc>(context)
-                        .add(ChangeToDate(date: currentValue));
-                  },
-                )),
-              ],
-            )
-          ])
-        ])));
+                  )),
+              Divider(),
+              Column(children: [
+                Row(
+                  children: [
+                    Text('from'), //TODO localization
+                    Expanded(
+                        child: DateTimeField(
+                      textAlign: TextAlign.right,
+                      initialValue: widget.fromDate,
+                      format: DateFormat.yMd(
+                          Localizations.localeOf(context).languageCode),
+                      onShowPicker: (context, currentValue) {
+                        return showDatePicker(
+                            context: context,
+                            firstDate: DateTime(1900),
+                            initialDate:
+                                currentValue == DatabaseHandler.defaultDate
+                                    ? DateTime.now()
+                                    : currentValue ?? DateTime.now(),
+                            lastDate: DateTime(2100));
+                      },
+                      onChanged: (DateTime? currentValue) {
+                        widget.fromDate = currentValue;
+                        BlocProvider.of<ExpenseFilterBloc>(context)
+                            .add(ChangeFromDate(date: currentValue));
+                      },
+                    )),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text('to'), //TODO localization
+                    Expanded(
+                        child: DateTimeField(
+                      textAlign: TextAlign.right,
+                      initialValue: widget.toDate,
+                      format: DateFormat.yMd(
+                          Localizations.localeOf(context).languageCode),
+                      onShowPicker: (context, currentValue) {
+                        return showDatePicker(
+                            context: context,
+                            firstDate: DateTime(1900),
+                            initialDate:
+                                currentValue == DatabaseHandler.defaultDate
+                                    ? DateTime.now()
+                                    : currentValue ?? DateTime.now(),
+                            lastDate: DateTime(2100));
+                      },
+                      onChanged: (DateTime? currentValue) {
+                        widget.toDate = currentValue;
+                        BlocProvider.of<ExpenseFilterBloc>(context)
+                            .add(ChangeToDate(date: currentValue));
+                      },
+                    )),
+                  ],
+                )
+              ])
+            ]))));
   }
 }

@@ -6,15 +6,32 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:ledgerstats/Expenses/view/add_expenditure_view.dart';
 
 class ExpenditureView extends StatefulWidget {
-  Expenditure expenditure;
-
-  ExpenditureView({super.key, required this.expenditure});
+  int id;
+  ExpenditureView({super.key, required this.id});
 
   @override
   State<ExpenditureView> createState() => ExpenditureViewState();
 }
 
 class ExpenditureViewState extends State<ExpenditureView> {
+  late Future<Expenditure> _expenseFuture =
+      DatabaseHandler().getExpense(widget.id);
+  late Expenditure _expense;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _expenseFuture.then((value) => _expense = value);
+  }
+
+  @override
+  void didUpdateWidget(ExpenditureView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _expenseFuture = DatabaseHandler().getExpense(widget.id);
+    _expenseFuture.then((value) => _expense = value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,20 +43,19 @@ class ExpenditureViewState extends State<ExpenditureView> {
                   context: context,
                   builder: (BuildContext context) => AlertDialog(
                         title: Text(
-                            'Delete Expense ${widget.expenditure.title}'), //TODO localization
+                            'Delete Expense ${_expense.title}'), //TODO localization
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                                "Do you really want to delete the expense ${widget.expenditure.title}"), //TODO localization
+                                "Do you really want to delete the expense ${_expense.title}"), //TODO localization
                           ],
                         ),
                         actions: <Widget>[
                           TextButton(
                             onPressed: () async {
-                              await DatabaseHandler()
-                                  .deleteExpense(widget.expenditure);
+                              await DatabaseHandler().deleteExpense(_expense);
                               Navigator.of(context).pop();
                               Navigator.of(context).pop();
                               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -71,11 +87,11 @@ class ExpenditureViewState extends State<ExpenditureView> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => AddExpenditureView(
-                            expenditure: widget.expenditure,
-                          ))).then((_) async {
-                await DatabaseHandler().fetchData();
-                findExpenditureDisplayed();
-                setState(() {});
+                            expenditure: _expense,
+                          ))).then((_) {
+                setState(() {
+                  _expenseFuture = DatabaseHandler().getExpense(widget.id);
+                });
               });
             },
             heroTag: "modifyFAB",
@@ -89,45 +105,69 @@ class ExpenditureViewState extends State<ExpenditureView> {
           title: const Text('View an Expenditure'), //TODO localization
           leading: const BackButton(),
         ),
-        body: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                  margin: const EdgeInsets.only(top: 15),
-                  child: Text(
-                    widget.expenditure.title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 25),
-                  )),
-              Container(
-                margin: const EdgeInsets.only(top: 30),
-                child: Row(children: [
-                  Expanded(
-                      child:
-                          Center(child: Text('${widget.expenditure.value}€'))),
-                  Expanded(
-                      child: Center(
+        body: FutureBuilder<Expenditure>(
+            future: _expenseFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData) {
+                return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                          margin: const EdgeInsets.only(top: 15),
                           child: Text(
-                              '${widget.expenditure.date.day.toString().padLeft(2, '0')}/${widget.expenditure.date.month.toString().padLeft(2, '0')}/${widget.expenditure.date.year.toString().padLeft(2, '0')}')))
-                ]),
-              ),
-              Expanded(
-                  flex: 2,
-                  child: CategoryItem(
-                    category: widget.expenditure.category,
-                    notifyParent: () {},
-                    displayBin: false,
-                  ))
-            ]));
-  }
-
-  void findExpenditureDisplayed() {
-    for (var exp in DatabaseHandler.expendituresList) {
-      if (exp.dataBaseId == widget.expenditure.dataBaseId) {
-        //found it!
-        widget.expenditure = exp;
-      }
-    }
+                            snapshot.data!.title,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 25),
+                          )),
+                      Container(
+                        margin: const EdgeInsets.only(top: 30),
+                        child: Row(children: [
+                          Expanded(
+                              child: Center(child: Text('${_expense.value}€'))),
+                          Expanded(
+                              child: Center(
+                                  child: Text(
+                                      '${_expense.date.day.toString().padLeft(2, '0')}/${_expense.date.month.toString().padLeft(2, '0')}/${_expense.date.year.toString().padLeft(2, '0')}')))
+                        ]),
+                      ),
+                      Expanded(
+                          flex: 2,
+                          child: CategoryItem(
+                            category: snapshot.data!.category,
+                            notifyParent: () {},
+                            displayBin: false,
+                          ))
+                    ]);
+              } else if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasError) {
+                return Column(children: <Widget>[
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 60,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Text('Error: ${snapshot.error}'),
+                  ),
+                ]);
+              } else {
+                return Column(children: <Widget>[
+                  const Icon(
+                    Icons.error_outline,
+                    color: Colors.red,
+                    size: 60,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Text('Error: No Data'),
+                  ),
+                ]);
+              }
+            }));
   }
 }

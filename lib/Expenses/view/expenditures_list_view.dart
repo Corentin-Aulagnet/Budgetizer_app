@@ -14,7 +14,7 @@ import 'package:ledgerstats/navigation_drawer.dart';
 
 class _ExpendituresState extends State<Expenditures>
     with SingleTickerProviderStateMixin {
-  //late Future<List<Expenditure>> _dataFuture = DatabaseHandler().fetchData();
+  final Future<Data> _dataFuture = DatabaseHandler().getData();
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -24,7 +24,7 @@ class _ExpendituresState extends State<Expenditures>
     _controller = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
-      value: widget.isPopOutVisible ? 1.0 : 0.0,
+      value: 0.0,
     );
     _animation = Tween<double>(
       begin: 0.0,
@@ -32,7 +32,7 @@ class _ExpendituresState extends State<Expenditures>
     ).animate(_controller);
   }
 
-  void _togglePopOut() {
+  /*void _togglePopOut() {
     setState(() {
       widget.isPopOutVisible = !widget.isPopOutVisible;
       if (widget.isPopOutVisible) {
@@ -41,6 +41,14 @@ class _ExpendituresState extends State<Expenditures>
         _controller.reverse();
       }
     });
+  }*/
+  void _togglePopOut() {
+    widget.isPopOutVisible = !widget.isPopOutVisible;
+    if (widget.isPopOutVisible) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
   }
 
   @override
@@ -74,85 +82,105 @@ class _ExpendituresState extends State<Expenditures>
               title: Text(AppLocalizations.of(context)!.welcomeMessage),
             ),
             key: UniqueKey(),
-            body: GestureDetector(
-                onTap: () {
-                  if (widget.isPopOutVisible) {
-                    _togglePopOut();
-                  }
-                },
-                child: Column(children: [
-                  Expanded(
-                      child: Stack(children: [
-                    BlocBuilder<ExpenseFilterBloc, ExpenseFilterState>(
-                        builder: (context, state) {
-                      List<Expenditure> filteredList =
-                          List.from(DatabaseHandler.expendituresList.where(
-                        (Expenditure element) {
-                          //on date
-                          bool fromDateOk = true;
-                          if (state.fromDate != null) {
-                            //fromDate is before or same moment as element.date
-                            fromDateOk =
-                                state.fromDate!.compareTo(element.date) <= 0;
-                          }
-                          bool toDateOk = true;
-                          if (state.toDate != null) {
-                            //fromDate is after or same moment as element.date
-                            toDateOk =
-                                state.toDate!.compareTo(element.date) >= 0;
-                          }
-                          //on category
-                          bool categoryFilter = true;
-                          if (state.categoriesInFilter.isNotEmpty) {
-                            categoryFilter = state.categoriesInFilter
-                                .contains(element.category);
-                          }
-                          return categoryFilter && fromDateOk && toDateOk;
-                        },
-                      ));
-                      return ListView.builder(
-                          itemCount: filteredList.length,
-                          itemBuilder: (context, index) {
-                            Expenditure row = filteredList[index];
-                            return ListTile(
-                              title: Text(
-                                  '${row.title} | ${row.category.getName(context)}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold)),
-                              trailing: Text(row.category.emoji),
-                              subtitle: Text(
-                                  '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(row.date)} ${row.value.toString()}€'),
-                              onTap: () {
-                                if (!widget.isPopOutVisible) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            ExpenditureView(expenditure: row)),
-                                  ).then((_) => refreshView());
-                                } else {
-                                  _togglePopOut();
+            body: FutureBuilder<Data>(
+              future: _dataFuture,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return GestureDetector(
+                      onTap: () {
+                        if (widget.isPopOutVisible) {
+                          _togglePopOut();
+                        }
+                      },
+                      child: Column(children: [
+                        Expanded(
+                            child: Stack(children: [
+                          BlocBuilder<ExpenseFilterBloc, ExpenseFilterState>(
+                              builder: (context, state) {
+                            List<Expenditure> filteredList =
+                                List.from(snapshot.data!.expenses.where(
+                              (Expenditure element) {
+                                //on date
+                                bool fromDateOk = true;
+                                if (state.fromDate != null) {
+                                  //fromDate is before or same moment as element.date
+                                  fromDateOk =
+                                      state.fromDate!.compareTo(element.date) <=
+                                          0;
                                 }
+                                bool toDateOk = true;
+                                if (state.toDate != null) {
+                                  //fromDate is after or same moment as element.date
+                                  toDateOk =
+                                      state.toDate!.compareTo(element.date) >=
+                                          0;
+                                }
+                                //on category
+                                bool categoryFilter = true;
+                                if (state.categoriesInFilter.isNotEmpty) {
+                                  categoryFilter = state.categoriesInFilter
+                                      .contains(element.category);
+                                }
+                                return categoryFilter && fromDateOk && toDateOk;
                               },
-                            );
-                          });
-                    }),
-                    Align(
-                        alignment: Alignment.topRight,
-                        child: ScaleTransition(
-                          alignment: Alignment.topRight,
-                          scale: _animation,
-                          child: FilterPanel(widget.expenseFilterBloc,
-                              checkedCategories: widget.categoriesFiltered),
-                        ))
-                  ]))
-                ]))));
+                            ));
+                            return ListView.builder(
+                                itemCount: filteredList.length,
+                                itemBuilder: (context, index) {
+                                  Expenditure row = filteredList[index];
+                                  return ListTile(
+                                    title: Text(
+                                        '${row.title} | ${row.category.getName(context)}',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    trailing: Text(row.category.emoji),
+                                    subtitle: Text(
+                                        '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(row.date)} ${row.value.toString()}€'),
+                                    onTap: () {
+                                      if (!widget.isPopOutVisible) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ExpenditureView(
+                                                      id: row.dataBaseId)),
+                                        ).then((_) => refreshView());
+                                      } else {
+                                        _togglePopOut();
+                                      }
+                                    },
+                                  );
+                                });
+                          }),
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: FilterPanel(
+                              widget.expenseFilterBloc,
+                              categories: snapshot.data!.categories,
+                              checkedCategories: widget.categoriesFiltered,
+                              animation: _animation,
+                              controller: _controller,
+                            ),
+                          )
+                        ]))
+                      ]));
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            )));
   }
 
   Future<void> refreshView() => Future(() {
-        //_dataFuture = DatabaseHandler().fetchData();
+        //DatabaseHandler().fetchAll();
         setState(() {});
       });
+}
+
+class FilterAnimateCubit extends Cubit<bool> {
+  FilterAnimateCubit() : super(false);
+
+  void animate() => emit(!state);
 }
 
 class Expenditures extends StatefulWidget {

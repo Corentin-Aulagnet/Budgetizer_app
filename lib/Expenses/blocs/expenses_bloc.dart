@@ -12,6 +12,7 @@ class AddToFilter extends ExpenseFilterEvent {
 
 class AddAllToFilter extends ExpenseFilterEvent {
   List<CategoryDescriptor> categories;
+  //Add all the categories passed as arguments to the filter
   AddAllToFilter({required this.categories});
 }
 

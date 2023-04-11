@@ -19,6 +19,8 @@ class StatisticsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (DatabaseHandler.expendituresList.isNotEmpty) {
+      //TODO implement a FutureBuilder here to check if there are any data
+      //Maybe we don't event need it and we just have to personnalize the messages from the Builder of Statistics
       return Statistics();
     } else {
       return const EmptyDataBaseStatistics();
@@ -54,6 +56,7 @@ class Statistics extends StatefulWidget {
 
 class StatisticsState extends State<Statistics>
     with SingleTickerProviderStateMixin {
+  Future<Data> _dataFuture = DatabaseHandler().getData();
   late TabController tabController;
   @override
   void initState() {
@@ -64,63 +67,108 @@ class StatisticsState extends State<Statistics>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: TabBar(
-        controller: tabController,
-        tabs: const [
-          Tab(
-              icon: Icon(
-            IcoFontIcons.chartPieAlt,
-            color: AppColors.primaryColor,
-          )),
-          Tab(
-              icon: Icon(IcoFontIcons.chartBarGraph,
-                  color: AppColors.primaryColor)),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
-          // Add your onPressed code here!
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddExpenditureView()));
-        },
-        backgroundColor: AppColors.secondaryColor,
-        child: const Icon(Icons.add),
-      ),
-      drawer: AppNavigationDrawer(),
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.welcomeMessage),
-      ),
-      body: TabBarView(controller: tabController, children: [
-        BlocProvider(
-            create: (_) => PieChartBloc(),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  PieTypeChips(),
-                  Row(children: <Widget>[
+        bottomNavigationBar: TabBar(
+          controller: tabController,
+          tabs: const [
+            Tab(
+                icon: Icon(
+              IcoFontIcons.chartPieAlt,
+              color: AppColors.primaryColor,
+            )),
+            Tab(
+                icon: Icon(IcoFontIcons.chartBarGraph,
+                    color: AppColors.primaryColor)),
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            //We need a bloc for the expenditureList view to refresh only this widget after a expenditure has been added
+            // Add your onPressed code here!
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => AddExpenditureView()));
+          },
+          backgroundColor: AppColors.secondaryColor,
+          child: const Icon(Icons.add),
+        ),
+        drawer: AppNavigationDrawer(),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.welcomeMessage),
+        ),
+        body: FutureBuilder<Data>(
+          future: _dataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator();
+            } else if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.hasData) {
+              return TabBarView(controller: tabController, children: [
+                BlocProvider(
+                    create: (_) {
+                      bool initialShowAllCategories = false;
+                      String month =
+                          snapshot.data!.expenses.first.date.month.toString();
+                      String year =
+                          snapshot.data!.expenses.first.date.year.toString();
+                      return PieChartBloc(
+                          data: snapshot.data!,
+                          month: month,
+                          year: year,
+                          showAllCategories: initialShowAllCategories);
+                    },
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          PieTypeChips(),
+                          Row(children: <Widget>[
+                            const SizedBox(
+                              width: 28,
+                            ),
+                            DateDropDownMenu(),
+                            categoriesToDisplaySwitch(),
+                          ]),
+                          Expanded(child: SelectedPie()),
+                        ])),
+                BlocProvider(
+                  create: (_) => BarChartBloc(data: snapshot.data!),
+                  child: SingleChildScrollView(
+                      child: Column(children: [
                     const SizedBox(
-                      width: 28,
+                      width: 10,
                     ),
-                    DateDropDownMenu(),
-                    categoriesToDisplaySwitch(),
-                  ]),
-                  Expanded(child: SelectedPie()),
-                ])),
-        BlocProvider(
-          create: (_) => BarChartBloc(),
-          child: SingleChildScrollView(
-              child: Column(children: [
-            const SizedBox(
-              width: 10,
-            ),
-            charts.MontlhyBarChart(),
-            MonthsMultiSelector()
-          ])),
-        )
-      ]),
-    );
+                    charts.MontlhyBarChart(),
+                    MonthsMultiSelector(snapshot.data!.expenses)
+                  ])),
+                )
+              ]);
+            } else if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.hasError) {
+              return Column(children: <Widget>[
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 60,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text('Error: ${snapshot.error}'),
+                ),
+              ]);
+            } else {
+              return Column(children: <Widget>[
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 60,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text('Error: No Data'),
+                ),
+              ]);
+            }
+          },
+        ));
   }
 }
 
@@ -132,7 +180,7 @@ class categoriesToDisplaySwitch extends StatelessWidget {
         builder: (context, chartState) {
       return Card(
           child: Row(children: [
-        Text('Display all actegories'), //TODO localization
+        Text('Display all categories'), //TODO localization
         Switch(
             // This bool value toggles the switch.
 
@@ -151,10 +199,11 @@ class categoriesToDisplaySwitch extends StatelessWidget {
 }
 
 class MonthsMultiSelector extends StatelessWidget {
+  List<Expenditure> expenses;
+  MonthsMultiSelector(this.expenses);
   List<MonthDisplay> getSelectableMonths() {
-    List<Expenditure> exps = DatabaseHandler.expendituresList;
     Set<MonthDisplay> datesSet = {};
-    for (Expenditure exp in exps) {
+    for (Expenditure exp in expenses) {
       MonthDisplay monthDisplay =
           MonthDisplay(m: exp.date.month, y: exp.date.year);
       datesSet.add(monthDisplay);
@@ -295,20 +344,20 @@ class DateDropDownMenu extends StatelessWidget {
     if (chartState.chartType == charts.ChartsType.monthlyPie) {
       return <Widget>[
         DropdownButton<String>(
-          value: chartState.month.first,
+          value: chartState.month,
           onChanged: (String? value) {
             // This is called when the user selects an item.
-            BlocProvider.of<PieChartBloc>(context).add(
-                ChangePieChartDate(month: [value!], year: chartState.year));
+            BlocProvider.of<PieChartBloc>(context)
+                .add(ChangePieChartDate(month: value!, year: chartState.year));
           },
           items: getMonths(context),
         ),
         DropdownButton<String>(
-          value: chartState.year.first,
+          value: chartState.year,
           onChanged: (String? value) {
             // This is called when the user selects an item.
-            BlocProvider.of<PieChartBloc>(context).add(
-                ChangePieChartDate(month: chartState.month, year: [value!]));
+            BlocProvider.of<PieChartBloc>(context)
+                .add(ChangePieChartDate(month: chartState.month, year: value!));
           },
           items: getYears(context),
         ),
@@ -316,11 +365,11 @@ class DateDropDownMenu extends StatelessWidget {
     } else {
       return <Widget>[
         DropdownButton<String>(
-          value: chartState.year.first,
+          value: chartState.year,
           onChanged: (String? value) {
             // This is called when the user selects an item.
-            BlocProvider.of<PieChartBloc>(context).add(
-                ChangePieChartDate(month: chartState.month, year: [value!]));
+            BlocProvider.of<PieChartBloc>(context)
+                .add(ChangePieChartDate(month: chartState.month, year: value!));
           },
           items: getYears(context),
         ),
