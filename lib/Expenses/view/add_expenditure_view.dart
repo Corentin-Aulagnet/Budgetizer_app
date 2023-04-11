@@ -158,6 +158,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           FocusManager.instance.primaryFocus?.unfocus();
         },
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
           appBar: AppBar(
             title: Text(widget.isModifying
                 ? AppLocalizations.of(context)!.modifyExpenseTitle
