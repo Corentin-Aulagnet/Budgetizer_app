@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:ledgerstats/Analytics/utils/charts.dart';
 import 'package:ledgerstats/Analytics/blocs/analytics_bloc.dart';
 import 'package:ledgerstats/database_handler.dart';
@@ -94,26 +95,22 @@ class _HomeState extends State<Home> {
                           MonthlyPie(
                             alignment: Axis.horizontal,
                           ),
-                          ListTile(
-                            leading:
-                                Text(snapshot.data!.expenses[0].category.emoji),
-                            title: Text(
-                                '${snapshot.data!.expenses[0].title} | ${snapshot.data!.expenses[0].category.getName(context)}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                            subtitle: Text(
-                                '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(snapshot.data!.expenses[0].date)} ${snapshot.data!.expenses[0].value.toString()}€'),
-                          ),
-                          ListTile(
-                            title: Text(
-                                '${snapshot.data!.expenses[1].title} | ${snapshot.data!.expenses[1].category.getName(context)}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold)),
-                            leading:
-                                Text(snapshot.data!.expenses[1].category.emoji),
-                            subtitle: Text(
-                                '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(snapshot.data!.expenses[1].date)} ${snapshot.data!.expenses[1].value.toString()}€'),
-                          ),
+                          Column(
+                              children: List.generate(
+                            min(snapshot.data!.expenses.length, 2),
+                            (index) {
+                              return ListTile(
+                                leading: Text(snapshot
+                                    .data!.expenses[index].category.emoji),
+                                title: Text(
+                                    '${snapshot.data!.expenses[index].title} | ${snapshot.data!.expenses[index].category.getName(context)}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                subtitle: Text(
+                                    '${DateFormat.yMd(Localizations.localeOf(context).languageCode).format(snapshot.data!.expenses[index].date)} ${snapshot.data!.expenses[index].value.toString()}€'),
+                              );
+                            },
+                          ))
                         ],
                       )));
             } else {
