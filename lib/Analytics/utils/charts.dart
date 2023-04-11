@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledgerstats/Analytics/blocs/analytics_bloc.dart';
+import 'package:ledgerstats/tuple.dart';
 
 class YearlyPie extends StatefulWidget {
   double aspectRatio;
@@ -42,26 +43,22 @@ class MontlhyBarChart extends StatelessWidget {
                   aspectRatio: 1,
                   child: BarChart(BarChartData(
                       titlesData: xAxisTitlesData,
-                      barGroups: getData(months),
+                      barGroups: getBarChartGroupData(months, state),
                       gridData: FlGridData(drawVerticalLine: false))))),
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: showingIndicators(context, months),
+            children: showingIndicators(context, state),
           ),
         ]);
       },
     );
   }
 
-  List<Widget> showingIndicators(
-      BuildContext context, List<MonthDisplay> monthsToDisplay) {
-    Set<CategoryDescriptor> categoriesDisplayed = {};
-    monthsToDisplay = bubbleSort(monthsToDisplay);
-    for (MonthDisplay monthYear in monthsToDisplay) {
-      Map<CategoryDescriptor, double> dataAggregate = getDataByMonth(monthYear);
-      categoriesDisplayed.addAll(dataAggregate.keys);
-    }
+  List<Widget> showingIndicators(BuildContext context, BarChartState state) {
+    Tuple<Map<String, Map<CategoryDescriptor, double>>, Set<CategoryDescriptor>>
+        tuple = state.groupedData;
+    Set<CategoryDescriptor> categoriesDisplayed = tuple.second;
 
     return List.generate(categoriesDisplayed.length, (index) {
       return Column(children: <Widget>[
@@ -98,19 +95,6 @@ class MontlhyBarChart extends StatelessWidget {
         style: style,
       ),
     );
-  }
-
-  List<MonthDisplay> bubbleSort(List<MonthDisplay> list) {
-    for (int i = 0; i < list.length; i++) {
-      for (int j = 0; j < list.length - 1; j++) {
-        if (list[j] > list[j + 1]) {
-          MonthDisplay num = list[j];
-          list[j] = list[j + 1];
-          list[j + 1] = num;
-        }
-      }
-    }
-    return list;
   }
 
   Widget getYAxisTitles(double value, TitleMeta meta) {
@@ -153,18 +137,17 @@ class MontlhyBarChart extends StatelessWidget {
           sideTitles: SideTitles(showTitles: false),
         ),
       );
-  List<BarChartGroupData> getData(List<MonthDisplay> monthsToDisplay) {
+  List<BarChartGroupData> getBarChartGroupData(
+      List<MonthDisplay> monthsToDisplay, BarChartState state) {
     maxY = 0;
     //aggregate data per categorie per months
-    Map<String, Map<CategoryDescriptor, double>> data = {};
-    Set<CategoryDescriptor> categories = {};
+
+    Tuple<Map<String, Map<CategoryDescriptor, double>>, Set<CategoryDescriptor>>
+        tuple = state.groupedData;
+    Map<String, Map<CategoryDescriptor, double>> data = tuple.first;
+    Set<CategoryDescriptor> categories = tuple.second;
     Map<CategoryDescriptor, Color> categoryColor = {};
-    monthsToDisplay = bubbleSort(monthsToDisplay);
-    for (MonthDisplay monthYear in monthsToDisplay) {
-      Map<CategoryDescriptor, double> dataAggregate = getDataByMonth(monthYear);
-      categories.addAll(dataAggregate.keys);
-      data[monthYear.toString()] = dataAggregate;
-    }
+
     //Atribute a color for each categories that will be displayed
     for (int index = 0; index < List.from(categories).length; index++) {
       categoryColor[List.from(categories)[index]] = AppColors.palette3[index];
@@ -196,39 +179,6 @@ class MontlhyBarChart extends StatelessWidget {
     }
     return groups;
   }
-
-  Map<CategoryDescriptor, double> getDataByMonth(MonthDisplay monthYear) {
-    List<Expenditure> results = DatabaseHandler.expendituresList;
-    List<Expenditure> dataToPlot = List.empty(growable: true);
-    Set<CategoryDescriptor> categoriesToPlot = {};
-    Map<CategoryDescriptor, double> dataToPlotGroupedBycategories = {};
-    //Filters by date
-    DateTime mmyy = DateTime(monthYear.y, monthYear.m);
-    for (Expenditure element in results) {
-      DateTime date = element.date;
-      bool categoryIsARoot = element.category.parent == null;
-      if (date.month == mmyy.month &&
-          date.year == mmyy.year &&
-          categoryIsARoot) {
-        //Show only cluster or orphan category (ie. that have no parents)
-        categoriesToPlot.add(element.category);
-        dataToPlot.add(element);
-      }
-    }
-    //Aggregate by categories
-    for (CategoryDescriptor element in categoriesToPlot) {
-      dataToPlotGroupedBycategories[element] = 0;
-    }
-    for (int i = 0; i < dataToPlot.length; i++) {
-      Expenditure element = dataToPlot[i];
-      dataToPlotGroupedBycategories.update(
-        element.category,
-        (value) => element.value + value,
-        ifAbsent: () => element.value,
-      );
-    }
-    return dataToPlotGroupedBycategories;
-  }
 }
 
 enum ChartsType { monthlyPie, yearlyPie, barChart }
@@ -245,8 +195,6 @@ class YearlyPieState extends State<YearlyPie> {
   late ChartsType type;
   DateTime yy = DateTime(2021);
   bool displayAllCategories = false;
-  String yearOnGraph =
-      DatabaseHandler.expendituresList.first.date.year.toString();
 
   double totalValueDisplayed = 0.0;
 
@@ -254,7 +202,6 @@ class YearlyPieState extends State<YearlyPie> {
   Widget build(BuildContext context) {
     return BlocBuilder<PieChartBloc, PieChartState>(builder: (_, chartState) {
       type = chartState.chartType;
-      yearOnGraph = chartState.year.first.toString();
       displayAllCategories = chartState.showAllCategories;
       return Card(
           color: Colors.white,
@@ -285,7 +232,7 @@ class YearlyPieState extends State<YearlyPie> {
                       ),
                       sectionsSpace: 0,
                       centerSpaceRadius: 80,
-                      sections: showingSections(),
+                      sections: showingSections(chartState),
                     ),
                   ),
                 ),
@@ -295,15 +242,15 @@ class YearlyPieState extends State<YearlyPie> {
                 spacing: 8.0, // Adjust as needed
                 runSpacing: 8.0, // Adjust as needed
                 //crossAxisAlignment: CrossAxisAlignment.start,
-                children: showingIndicators(),
+                children: showingIndicators(chartState),
               )
             ],
           ));
     });
   }
 
-  List<Widget> showingIndicators() {
-    Map<CategoryDescriptor, double> data = getData();
+  List<Widget> showingIndicators(PieChartState state) {
+    Map<CategoryDescriptor, double> data = state.groupedData;
     return List.generate(data.length, (index) {
       return Column(children: <Widget>[
         Row(
@@ -323,8 +270,8 @@ class YearlyPieState extends State<YearlyPie> {
     });
   }
 
-  List<PieChartSectionData> showingSections() {
-    Map<CategoryDescriptor, double> data = getData();
+  List<PieChartSectionData> showingSections(PieChartState state) {
+    Map<CategoryDescriptor, double> data = state.groupedData;
     return List.generate(data.length, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 16.0 : 10.0;
@@ -359,55 +306,8 @@ class YearlyPieState extends State<YearlyPie> {
     });
   }
 
-  Map<CategoryDescriptor, double> getData() {
-    List<Expenditure> results = DatabaseHandler.expendituresList;
-    List<Expenditure> dataToPlot = List.empty(growable: true);
-    Set<CategoryDescriptor> categoriesToPlot = {};
-    Map<CategoryDescriptor, double> dataToPlotGroupedBycategories = {};
-    totalValueDisplayed = 0.0;
-    //Filters by date
-    yy = DateTime(int.parse(yearOnGraph));
-    for (Expenditure exp in results) {
-      DateTime date = exp.date;
-      bool categoryIsARoot = exp.category.parent == null;
-      if (date.year == yy.year && (displayAllCategories || categoryIsARoot)) {
-        categoriesToPlot.add(exp.category);
-        dataToPlot.add(exp);
-      } else if (date.year == yy.year &&
-          !(displayAllCategories || categoryIsARoot)) {
-        dataToPlot.add(Expenditure(
-            title: exp.title,
-            category: exp.category.parent!,
-            value: exp.value,
-            date: date,
-            dataBaseId: exp.dataBaseId));
-      }
-      //Aggregate by categories
-      for (CategoryDescriptor cat in categoriesToPlot) {
-        dataToPlotGroupedBycategories[cat] = 0;
-      }
-      for (int i = 0; i < dataToPlot.length; i++) {
-        Expenditure exp = dataToPlot[i];
-        totalValueDisplayed += exp.value;
-        dataToPlotGroupedBycategories.update(
-          exp.category,
-          (value) => exp.value + value,
-          ifAbsent: () => exp.value,
-        );
-      }
-      //Normalize and converts to %
-      for (var element in dataToPlotGroupedBycategories.keys) {
-        double tmpValue = dataToPlotGroupedBycategories[element]!;
-        tmpValue /= totalValueDisplayed;
-        tmpValue *= 100;
-        dataToPlotGroupedBycategories[element] = tmpValue;
-      }
-    }
-    return dataToPlotGroupedBycategories;
-  }
-
-  List<Widget> showingListTiles() {
-    Map<CategoryDescriptor, double> data = getData();
+  List<Widget> showingListTiles(PieChartState state) {
+    Map<CategoryDescriptor, double> data = state.groupedData;
     return List.generate(data.length, (index) {
       return ListTile(
           leading: Text(data.keys.elementAt(index).emoji),
@@ -422,12 +322,6 @@ class MonthlyPieState extends State<MonthlyPie> {
   int touchedIndex = -1;
   late ChartsType type;
   DateTime mmyy = DateTime(2021, 12);
-
-  String monthOnGraph =
-      DatabaseHandler.expendituresList.first.date.month.toString();
-  String yearOnGraph =
-      DatabaseHandler.expendituresList.first.date.year.toString();
-
   double totalValueDisplayed = 0.0;
   bool displayAllCategories = false;
 
@@ -435,11 +329,12 @@ class MonthlyPieState extends State<MonthlyPie> {
   Widget build(BuildContext context) {
     return BlocBuilder<PieChartBloc, PieChartState>(builder: (_, chartState) {
       type = chartState.chartType;
-      monthOnGraph = chartState.month.first.toString();
-      yearOnGraph = chartState.year.first.toString();
       displayAllCategories = chartState.showAllCategories;
-      if (DatabaseHandler.dataInDateFilter(
-          DateTime(int.parse(yearOnGraph), int.parse(monthOnGraph)), 1)) {
+      bool isThereData = chartState.data.expenses
+          .where((element) => element.date.isBefore(DateTime(
+              int.parse(chartState.year), int.parse(chartState.month))))
+          .isNotEmpty;
+      if (isThereData) {
         return Card(
             color: Colors.white,
             child: Flex(
@@ -470,7 +365,7 @@ class MonthlyPieState extends State<MonthlyPie> {
                         ),
                         sectionsSpace: 0,
                         centerSpaceRadius: 80,
-                        sections: showingSections(),
+                        sections: showingSections(chartState),
                       ),
                     ),
                   ),
@@ -480,7 +375,7 @@ class MonthlyPieState extends State<MonthlyPie> {
                   spacing: 8.0, // Adjust as needed
                   runSpacing: 8.0, // Adjust as needed
                   //crossAxisAlignment: CrossAxisAlignment.start,
-                  children: showingIndicators(),
+                  children: showingIndicators(chartState),
                 )
               ],
             ));
@@ -493,8 +388,8 @@ class MonthlyPieState extends State<MonthlyPie> {
     });
   }
 
-  List<Widget> showingIndicators() {
-    Map<CategoryDescriptor, double> data = getData();
+  List<Widget> showingIndicators(PieChartState state) {
+    Map<CategoryDescriptor, double> data = state.groupedData;
     return List.generate(data.length, (index) {
       return Column(children: <Widget>[
         Row(
@@ -514,8 +409,8 @@ class MonthlyPieState extends State<MonthlyPie> {
     });
   }
 
-  List<PieChartSectionData> showingSections() {
-    Map<CategoryDescriptor, double> data = getData();
+  List<PieChartSectionData> showingSections(PieChartState state) {
+    Map<CategoryDescriptor, double> data = state.groupedData;
     return List.generate(data.length, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 16.0 : 10.0;
@@ -550,58 +445,8 @@ class MonthlyPieState extends State<MonthlyPie> {
     });
   }
 
-  Map<CategoryDescriptor, double> getData() {
-    List<Expenditure> results = DatabaseHandler.expendituresList;
-    List<Expenditure> dataToPlot = List.empty(growable: true);
-    Set<CategoryDescriptor> categoriesToPlot = {};
-    Map<CategoryDescriptor, double> dataToPlotGroupedBycategories = {};
-    totalValueDisplayed = 0.0;
-    //Filters by date
-    mmyy = DateTime(int.parse(yearOnGraph), int.parse(monthOnGraph));
-    for (Expenditure exp in results) {
-      DateTime date = exp.date;
-      bool categoryIsARoot = exp.category.parent == null;
-      if (date.month == mmyy.month &&
-          date.year == mmyy.year &&
-          (displayAllCategories || categoryIsARoot)) {
-        categoriesToPlot.add(exp.category);
-        dataToPlot.add(exp);
-      } else if (date.month == mmyy.month &&
-          date.year == mmyy.year &&
-          !(displayAllCategories || categoryIsARoot)) {
-        dataToPlot.add(Expenditure(
-            title: exp.title,
-            category: exp.category.parent!,
-            value: exp.value,
-            date: date,
-            dataBaseId: exp.dataBaseId));
-      }
-    }
-    //Aggregate by categories
-    for (var element in categoriesToPlot) {
-      dataToPlotGroupedBycategories[element] = 0;
-    }
-    for (int i = 0; i < dataToPlot.length; i++) {
-      Expenditure element = dataToPlot[i];
-      totalValueDisplayed += element.value;
-      dataToPlotGroupedBycategories.update(
-        element.category,
-        (value) => element.value + value,
-        ifAbsent: () => element.value,
-      );
-    }
-    //Normalize and converts to %
-    for (var element in dataToPlotGroupedBycategories.keys) {
-      double tmpValue = dataToPlotGroupedBycategories[element]!;
-      tmpValue /= totalValueDisplayed;
-      tmpValue *= 100;
-      dataToPlotGroupedBycategories[element] = tmpValue;
-    }
-    return dataToPlotGroupedBycategories;
-  }
-
-  List<Widget> showingListTiles() {
-    Map<CategoryDescriptor, double> data = getData();
+  List<Widget> showingListTiles(PieChartState state) {
+    Map<CategoryDescriptor, double> data = state.groupedData;
     return List.generate(data.length, (index) {
       return ListTile(
           leading: Text(data.keys.elementAt(index).emoji),

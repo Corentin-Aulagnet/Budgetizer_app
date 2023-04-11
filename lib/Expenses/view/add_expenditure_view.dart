@@ -76,7 +76,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
       },
       validator: (String? value) {
         return (value != null &&
-                value.contains(RegExp('[a-zA-Z&é"\'()-è`_\\ç^à@[]=+{}]+')))
+                value.contains(RegExp('[a-zA-Z&é"\'()\-è`_\\ç^à@\[\]=+{}]+')))
             ? 'Use only numbers' //TODO localization
             : null;
       },
