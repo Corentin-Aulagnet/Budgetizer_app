@@ -331,7 +331,7 @@ class MonthlyPieState extends State<MonthlyPie> {
       type = chartState.chartType;
       displayAllCategories = chartState.showAllCategories;
       bool isThereData = chartState.data.expenses
-          .where((element) => element.date.isBefore(DateTime(
+          .where((element) => element.date.isAfter(DateTime(
               int.parse(chartState.year), int.parse(chartState.month))))
           .isNotEmpty;
       if (isThereData) {
