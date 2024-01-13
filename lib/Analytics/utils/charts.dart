@@ -383,7 +383,7 @@ class MonthlyPieState extends State<MonthlyPie> {
         return Card(
             color: Colors.white,
             child: Text(
-                "Oups no data to display, right now")); //TODO Localization //TODO add an cartoon image
+                "Oups no data to display right now")); //TODO Localization //TODO add a cartoon image
       }
     });
   }

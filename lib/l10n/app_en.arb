@@ -33,7 +33,7 @@
       }
     }
   },
-  "monthPreview": "Here is what {date} looks so far",
+  "monthPreview": "Here is how {date} looks so far",
 "@monthPreview": {
   "description": "A message with a date parameter",
   "placeholders": {
