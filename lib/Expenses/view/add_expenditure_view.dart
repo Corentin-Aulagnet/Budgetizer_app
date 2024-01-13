@@ -135,6 +135,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         ),
         onItemSelected: (CategoryDescriptor category) {
           if (category.getName(context) == "Create a category") {
+            //TODO localization
             //Push the view to create a category
             Navigator.push(
               context,
@@ -204,7 +205,9 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
             Row(children: <Widget>[
               Expanded(
                 child: DateTimeField(
-                  initialValue: widget.expenditure.date,
+                  initialValue: widget.isModifying
+                      ? widget.expenditure.date
+                      : DateTime.now(),
                   format: DateFormat.yMd(
                       Localizations.localeOf(context).languageCode),
                   onShowPicker: (context, currentValue) {
