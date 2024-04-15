@@ -2,6 +2,7 @@ import 'package:ledgerstats/Categories/utils/category_utils.dart';
 import 'package:ledgerstats/Expenses/utils/expenditure.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:flutter/material.dart';
 
 class Data {
   final List<CategoryDescriptor> categories;
@@ -19,7 +20,7 @@ class DatabaseHandler {
 
   static List<Expenditure> expendituresList = List.empty(growable: true);
   static List<CategoryDescriptor> categoriesList = List.empty(growable: true);
-  static DateTime defaultDate = DateTime(1970);
+  static DateTime defaultDate = DateUtils.dateOnly(DateTime.now());
 
   late Database db;
 

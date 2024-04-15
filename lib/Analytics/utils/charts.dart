@@ -203,6 +203,18 @@ class YearlyPieState extends State<YearlyPie> {
     return BlocBuilder<PieChartBloc, PieChartState>(builder: (_, chartState) {
       type = chartState.chartType;
       displayAllCategories = chartState.showAllCategories;
+
+      List<Expenditure> dataToDisplay = chartState.data.expenses
+          .where((element) =>
+              element.date.isAfter(DateTime(int.parse(chartState.year))))
+          .toList();
+      bool isThereData = dataToDisplay.isNotEmpty;
+      if (isThereData) {
+        totalValueDisplayed = 0.0;
+        for (Expenditure exp in dataToDisplay) {
+          totalValueDisplayed = totalValueDisplayed + exp.value;
+        }
+      }
       return Card(
           color: Colors.white,
           child: Flex(
@@ -251,6 +263,7 @@ class YearlyPieState extends State<YearlyPie> {
 
   List<Widget> showingIndicators(PieChartState state) {
     Map<CategoryDescriptor, double> data = state.groupedData;
+    print(data);
     return List.generate(data.length, (index) {
       return Column(children: <Widget>[
         Row(
@@ -330,11 +343,16 @@ class MonthlyPieState extends State<MonthlyPie> {
     return BlocBuilder<PieChartBloc, PieChartState>(builder: (_, chartState) {
       type = chartState.chartType;
       displayAllCategories = chartState.showAllCategories;
-      bool isThereData = chartState.data.expenses
+      List<Expenditure> dataToDisplay = chartState.data.expenses
           .where((element) => element.date.isAfter(DateTime(
               int.parse(chartState.year), int.parse(chartState.month))))
-          .isNotEmpty;
+          .toList();
+      bool isThereData = dataToDisplay.isNotEmpty;
       if (isThereData) {
+        totalValueDisplayed = 0.0;
+        for (Expenditure exp in dataToDisplay) {
+          totalValueDisplayed = totalValueDisplayed + exp.value;
+        }
         return Card(
             color: Colors.white,
             child: Flex(
@@ -380,7 +398,7 @@ class MonthlyPieState extends State<MonthlyPie> {
               ],
             ));
       } else {
-        return Card(
+        return const Card(
             color: Colors.white,
             child: Text(
                 "Oups no data to display right now")); //TODO Localization //TODO add a cartoon image

@@ -54,6 +54,7 @@ dependencies:
   multiple_search_selection: ^2.4.5
   patterns_canvas: ^0.4.0
   url_launcher: ^6.1.10
+  equatable: ^2.0.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

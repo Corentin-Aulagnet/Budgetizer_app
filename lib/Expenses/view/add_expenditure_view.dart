@@ -73,7 +73,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         // This optional block of code can be used to run
         // code when the user saves the form.
         if (value != null)
-          widget.expenditure.value = value != '' ? double.parse(value) : 0.0;
+          {widget.expenditure.value = value != '' ? double.parse(value) : 0.0;}
       },
       validator: (String? value) {
         return (value != null &&
@@ -89,8 +89,6 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         key: UniqueKey(),
         //only keep the categories that don't have children -> child category or orphan
         //Clusters should not be accessible as a base category
-        autoFocusOnSearch:
-            false, //makes the widget not autofocused and not focus when the user select a category
         initialList: List<CategoryDescriptor>.from(DatabaseHandler
                 .categoriesList
                 .where((element) => element.children.isEmpty)) +
@@ -107,7 +105,8 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
               (element) =>
                   element.getName(context).toLowerCase().contains(value),
             )),
-        builder: (CategoryDescriptor category) {
+        builder: (List<CategoryDescriptor> list, int num,
+            CategoryDescriptor category) {
           if (category.getName(context) == "Create a category") {
             //TODO localization
             return CategoryItem(
@@ -147,7 +146,8 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
               widget.expenditure.category = category;
             });
           }
-        });
+        },
+        closeKeyboardWhenScrolling: true);
   }
 
   @override
@@ -207,7 +207,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
                 child: DateTimeField(
                   initialValue: widget.isModifying
                       ? widget.expenditure.date
-                      : DateTime.now(),
+                      : DatabaseHandler.defaultDate,
                   format: DateFormat.yMd(
                       Localizations.localeOf(context).languageCode),
                   onShowPicker: (context, currentValue) {
@@ -215,8 +215,8 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
                         context: context,
                         firstDate: DateTime(1900),
                         initialDate: currentValue == DatabaseHandler.defaultDate
-                            ? DateTime.now()
-                            : currentValue ?? DateTime.now(),
+                            ? DatabaseHandler.defaultDate
+                            : currentValue ?? DatabaseHandler.defaultDate,
                         lastDate: DateTime(2100));
                   },
                   onChanged: (DateTime? currentValue) => {
@@ -256,7 +256,7 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         widget.expenditure.category == CategoryDescriptor.error()) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              'All fields must be filled ${widget.expenditure.title == '' ? 'Title' : ''} ${widget.expenditure.category == CategoryDescriptor.error() ? 'Category' : ''} ${widget.expenditure.value == 0.0 ? 'Amount' : ''} ${widget.expenditure.date == DatabaseHandler.defaultDate ? 'Date' : ''}'))); //TODO localization
+              '${DatabaseHandler.defaultDate} All fields must be filled ${widget.expenditure.title == '' ? 'Title' : ''} ${widget.expenditure.category == CategoryDescriptor.error() ? 'Category' : ''} ${widget.expenditure.value == 0.0 ? 'Amount' : ''} ${widget.expenditure.date == DatabaseHandler.defaultDate ? 'Date' : ''}'))); //TODO localization
       return false;
     } else {
       await DatabaseHandler().updateData(widget.expenditure);

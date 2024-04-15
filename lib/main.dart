@@ -32,13 +32,13 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
             primarySwatch: MaterialColor(
                 AppColors.primaryColor.value, AppColors.primaryColorSwatch)),
-        localizationsDelegates: [
+        localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
           AppLocalizations.delegate,
         ],
-        supportedLocales: [
+        supportedLocales: const [
           Locale('en'), // English
           Locale('fr'), // French
         ],
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
           '/Expenses': (context) => Expenditures(),
           '/Analytics': (context) => StatisticsView(),
           '/Categories': (context) => CategoriesView(),
-          '/Options': (context) => OptionsView(),
+          '/Options': (context) => const OptionsView(),
         });
   }
 }

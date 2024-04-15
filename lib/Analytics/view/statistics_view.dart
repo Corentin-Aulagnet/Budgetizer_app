@@ -218,6 +218,7 @@ class MonthsMultiSelector extends StatelessWidget {
       selectableMonths.removeWhere((element) => state.dates.contains(element));
       List<MonthDisplay> selectedMonths = List.from(state.dates);
       return MultipleSearchSelection<MonthDisplay>(
+        searchField: const TextField(),
         items: selectableMonths,
         initialPickedItems: state.dates,
         onItemAdded: (item) {
