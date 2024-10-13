@@ -1,4 +1,6 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledgerstats/Categories/utils/category_utils.dart';
+import 'package:ledgerstats/Expenses/blocs/expense_bloc.dart';
 import 'package:ledgerstats/database_handler.dart';
 import 'package:flutter/material.dart';
 import '../utils/expenditure.dart';
@@ -48,12 +50,13 @@ class ExpenditureViewState extends State<ExpenditureView> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                                "Do you really want to delete the expense ${_expense.title}"), //TODO localization
+                                "Do you really want to delete the expense **${_expense.title}**"), //TODO localization
                           ],
                         ),
                         actions: <Widget>[
                           TextButton(
                             onPressed: () async {
+                              context.read<ExpenseBloc>().add(DeleteExpense(expense: _expense));
                               await DatabaseHandler().deleteExpense(_expense);
                               Navigator.of(context).pop();
                               Navigator.of(context).pop();

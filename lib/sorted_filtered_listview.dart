@@ -1,85 +1,10 @@
 import 'package:ledgerstats/Categories/utils/category_utils.dart';
 import 'package:ledgerstats/Expenses/blocs/expenses_bloc.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:ledgerstats/Expenses/utils/expenditure.dart';
 import 'package:ledgerstats/database_handler.dart';
-
-class SortedFilteredListView extends StatefulWidget {
-  List<Expenditure> data;
-  Widget? Function(BuildContext, int) itemBuilder;
-  bool isExpanded;
-  SortedFilteredListView(
-      {required this.data,
-      required this.itemBuilder,
-      required this.isExpanded});
-
-  @override
-  SortedFilteredListViewState createState() => SortedFilteredListViewState();
-}
-
-class SortedFilteredListViewState<T> extends State<SortedFilteredListView>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
-      vsync: this,
-      value: widget.isExpanded ? 1.0 : 0.0,
-    );
-    _animation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(SortedFilteredListView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.isExpanded != widget.isExpanded) {
-      if (widget.isExpanded) {
-        _controller.forward();
-      } else {
-        _controller.reverse();
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(children: [
-      Expanded(
-          child: Stack(
-        children: [
-          ListView.builder(
-            itemCount: widget.data.length,
-            itemBuilder: widget.itemBuilder,
-          ),
-          ScaleTransition(
-            alignment: Alignment.topLeft,
-            scale: _animation,
-            child: /*FilterPanel(ExpenseFilterBloc(categoriesInFilter: []),
-                checkedCategories: [])*/
-                null,
-          )
-        ],
-      ))
-    ]);
-  }
-}
-
+import 'package:date_field/date_field.dart';
 class FilterPanel extends StatefulWidget {
   List<bool> checkedCategories;
   List<CategoryDescriptor> categories;
@@ -175,54 +100,36 @@ class FilterPanelState extends State<FilterPanel>
                   children: [
                     Text('from'), //TODO localization
                     Expanded(
-                        child: DateTimeField(
-                      textAlign: TextAlign.right,
-                      initialValue: widget.fromDate,
-                      format: DateFormat.yMd(
-                          Localizations.localeOf(context).languageCode),
-                      onShowPicker: (context, currentValue) {
-                        return showDatePicker(
-                            context: context,
-                            firstDate: DateTime(1900),
-                            initialDate:
-                                currentValue == DatabaseHandler.defaultDate
-                                    ? DateTime.now()
-                                    : currentValue ?? DateTime.now(),
-                            lastDate: DateTime(2100));
-                      },
-                      onChanged: (DateTime? currentValue) {
-                        widget.fromDate = currentValue;
-                        BlocProvider.of<ExpenseFilterBloc>(context)
-                            .add(ChangeFromDate(date: currentValue));
-                      },
-                    )),
+                        child: DateTimeFormField(
+                          mode: DateTimeFieldPickerMode.date,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter Date',
+                          ),
+                          firstDate: DateTime(1900,01,01),
+                          lastDate: DateTime(2100,12,31),
+                          initialPickerDateTime: DateTime.now(),
+                          onChanged: (DateTime? value) {
+                            //selectedDate = value;
+                          },
+                        ),),
                   ],
                 ),
                 Row(
                   children: [
                     Text('to'), //TODO localization
                     Expanded(
-                        child: DateTimeField(
-                      textAlign: TextAlign.right,
-                      initialValue: widget.toDate,
-                      format: DateFormat.yMd(
-                          Localizations.localeOf(context).languageCode),
-                      onShowPicker: (context, currentValue) {
-                        return showDatePicker(
-                            context: context,
-                            firstDate: DateTime(1900),
-                            initialDate:
-                                currentValue == DatabaseHandler.defaultDate
-                                    ? DateTime.now()
-                                    : currentValue ?? DateTime.now(),
-                            lastDate: DateTime(2100));
-                      },
-                      onChanged: (DateTime? currentValue) {
-                        widget.toDate = currentValue;
-                        BlocProvider.of<ExpenseFilterBloc>(context)
-                            .add(ChangeToDate(date: currentValue));
-                      },
-                    )),
+                        child: DateTimeFormField(
+                          mode: DateTimeFieldPickerMode.date,
+                          decoration: const InputDecoration(
+                            labelText: 'Enter Date',
+                          ),
+                          firstDate: DateTime(1900,01,01),
+                          lastDate: DateTime(2100,12,31),
+                          initialPickerDateTime: DateTime.now(),
+                          onChanged: (DateTime? value) {
+                            //selectedDate = value;
+                          },
+                        ),),
                   ],
                 )
               ])

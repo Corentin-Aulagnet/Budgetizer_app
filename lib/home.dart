@@ -41,7 +41,7 @@ class _HomeState extends State<Home> {
         future: _dataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {
             if (snapshot.data!.expenses.isNotEmpty) {
@@ -92,9 +92,9 @@ class _HomeState extends State<Home> {
                             ),
                             textAlign: TextAlign.center,
                           )),
-                          MonthlyPie(
+                          Expanded(child:Card(child:MonthlyPie(
                             alignment: Axis.horizontal,
-                          ),
+                          ))),
                           Column(
                               children: List.generate(
                             min(snapshot.data!.expenses.length, 2),

@@ -20,7 +20,7 @@ class DatabaseHandler {
 
   static List<Expenditure> expendituresList = List.empty(growable: true);
   static List<CategoryDescriptor> categoriesList = List.empty(growable: true);
-  static DateTime defaultDate = DateUtils.dateOnly(DateTime.now());
+  static DateTime defaultDate = DateTime(1900);
 
   late Database db;
 
@@ -100,7 +100,7 @@ class DatabaseHandler {
 
     var data = await db.query(
       expensesTableName,
-      orderBy: "date DESC",
+      orderBy: "date DESC, id DESC",
     );
 
     //Creates a data container with the Expenditures
@@ -122,6 +122,7 @@ class DatabaseHandler {
   Future<Data> getData() async {
     List<Expenditure> exp = await fetchData();
     List<CategoryDescriptor> cat = await loadCategories();
+    await Future.delayed(const Duration(seconds: 1));
     return Data(categories: cat, expenses: exp);
   }
 
@@ -150,7 +151,7 @@ class DatabaseHandler {
     await db.insert(expensesTableName, mapToInsert);
   }
 
-  Future<void> updateData(Expenditure expenditure) async {
+  Future<bool> updateData(Expenditure expenditure) async {
     Map<String, dynamic> mapToInsert = {
       'title': expenditure.title,
       'categoryID': expenditure.category.id,
@@ -166,6 +167,7 @@ class DatabaseHandler {
           where: 'id = ?', whereArgs: [expenditure.dataBaseId]);
     }
     expendituresList = await fetchData();
+    return true;
   }
 
   Future<void> deleteExpense(Expenditure exp) async {

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:ledgerstats/Categories/utils/category_utils.dart';
 import 'package:ledgerstats/Expenses/view/add_expenditure_view.dart';
 import 'package:flutter/material.dart';
 import 'package:ledgerstats/Expenses/view/expenditure_view.dart';
@@ -5,10 +7,10 @@ import 'package:ledgerstats/database_handler.dart';
 import 'package:ledgerstats/Expenses/utils/expenditure.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import 'package:ledgerstats/sorted_filtered_listview.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledgerstats/Expenses/blocs/expenses_bloc.dart';
-import 'package:ledgerstats/sorted_filtered_listview.dart';
+
 import 'package:ledgerstats/app_colors.dart';
 import 'package:ledgerstats/navigation_drawer.dart';
 
@@ -77,7 +79,7 @@ class _ExpendituresState extends State<Expenditures>
                     onPressed: () {
                       _togglePopOut();
                     },
-                    icon: Icon(Icons.filter_list))
+                    icon: const Icon(Icons.filter_list))
               ],
               title: Text(AppLocalizations.of(context)!.welcomeMessage),
             ),
@@ -156,7 +158,7 @@ class _ExpendituresState extends State<Expenditures>
                             alignment: Alignment.topRight,
                             child: FilterPanel(
                               widget.expenseFilterBloc,
-                              categories: snapshot.data!.categories,
+                              categories: List.from(snapshot.data!.categories.where((CategoryDescriptor cat)=> cat.isChild())),
                               checkedCategories: widget.categoriesFiltered,
                               animation: _animation,
                               controller: _controller,
@@ -165,7 +167,7 @@ class _ExpendituresState extends State<Expenditures>
                         ]))
                       ]));
                 } else {
-                  return CircularProgressIndicator();
+                  return Center(child: CircularProgressIndicator());
                 }
               },
             )));

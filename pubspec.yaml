@@ -43,7 +43,7 @@ dependencies:
   #faker: ^2.1.0
   #random_date: ^0.0.7
   intl: any
-  datetime_picker_formfield: ^2.0.1
+  date_field: ^5.0.1
   fl_chart: ^0.61.0
   searchable_listview: ^2.2.1
   material_design_icons_flutter : ^6.0.7096
@@ -55,6 +55,7 @@ dependencies:
   patterns_canvas: ^0.4.0
   url_launcher: ^6.1.10
   equatable: ^2.0.5
+  provider: ^6.1.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

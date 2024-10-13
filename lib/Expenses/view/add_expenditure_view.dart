@@ -1,10 +1,12 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledgerstats/Categories/utils/category_utils.dart';
-
+import 'package:ledgerstats/Expenses/blocs/expense_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:ledgerstats/database_handler.dart';
 import 'package:ledgerstats/Expenses/utils/expenditure.dart';
 import 'package:flutter/material.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-
+import 'package:date_field/date_field.dart';
+import 'package:bloc/bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:ledgerstats/Categories/view/create_category_view.dart';
 import 'package:searchable_listview/searchable_listview.dart';
@@ -15,13 +17,14 @@ import '../../app_colors.dart';
 class AddExpenditureView extends StatefulWidget {
   AddExpenditureView({super.key, Expenditure? expenditure}) {
     if (expenditure == null) {
-      this.expenditure = Expenditure.error();
+      this.expenditure = Expenditure.dummy();
       isModifying = false;
     } else {
       this.expenditure = Expenditure.copy(expenditure);
       isModifying = true;
     }
   }
+
   late Expenditure expenditure;
   late bool isModifying;
   @override
@@ -73,7 +76,9 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         // This optional block of code can be used to run
         // code when the user saves the form.
         if (value != null)
-          {widget.expenditure.value = value != '' ? double.parse(value) : 0.0;}
+          {
+            widget.expenditure.value = value != '' ? double.parse(value) : 0.0;
+          }
       },
       validator: (String? value) {
         return (value != null &&
@@ -149,17 +154,25 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
         },
         closeKeyboardWhenScrolling: true);
   }
-
   @override
   Widget build(BuildContext context) {
     //DatabaseHandler().loadCategories();
-
+    DateTime? selectedDate;
     return GestureDetector(
         onTap: () {
           //called when the body of the screen is touched
           FocusManager.instance.primaryFocus?.unfocus();
         },
-        child: Scaffold(
+        child: BlocListener<ExpenseBloc, ExpenseState>(
+  listener: (context, state) {
+    if(state is ExpensesLoaded){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(widget.isModifying
+              ? "Expense updated"
+              : "Expense added")));
+    }
+  },
+  child: Scaffold(
           resizeToAvoidBottomInset: false,
           appBar: AppBar(
             title: Text(widget.isModifying
@@ -204,24 +217,17 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
             ),
             Row(children: <Widget>[
               Expanded(
-                child: DateTimeField(
-                  initialValue: widget.isModifying
-                      ? widget.expenditure.date
-                      : DatabaseHandler.defaultDate,
-                  format: DateFormat.yMd(
-                      Localizations.localeOf(context).languageCode),
-                  onShowPicker: (context, currentValue) {
-                    return showDatePicker(
-                        context: context,
-                        firstDate: DateTime(1900),
-                        initialDate: currentValue == DatabaseHandler.defaultDate
-                            ? DatabaseHandler.defaultDate
-                            : currentValue ?? DatabaseHandler.defaultDate,
-                        lastDate: DateTime(2100));
-                  },
-                  onChanged: (DateTime? currentValue) => {
-                    if (currentValue != null)
-                      widget.expenditure.date = currentValue
+                child:DateTimeFormField(
+                  mode: DateTimeFieldPickerMode.date,
+                  decoration: const InputDecoration(
+                    labelText: 'Enter Date',
+                  ),
+                  firstDate: DateTime.now().add(const Duration(days: -365)),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                  initialPickerDateTime: widget.expenditure.date,
+                  onChanged: (DateTime? value) {
+                    selectedDate = value;
+                    if(value != null) widget.expenditure.date = value;
                   },
                 ),
               )
@@ -230,17 +236,25 @@ class _AddExpenditureViewState extends State<AddExpenditureView> {
           ]),
           floatingActionButton: FloatingActionButton(
               onPressed: () async {
-                bool added = await addExpenditureToDatabase();
-                if (added) {
-                  setState(() {
-                    Navigator.of(context).pop();
-                  });
+                bool added = false;
+                if (widget.expenditure.title == '' ||
+                    widget.expenditure.value == double.nan ||
+                    widget.expenditure.category == CategoryDescriptor.error()) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(
+                          'All fields must be filled ${widget.expenditure.title == '' ? 'Title' : ''} ${widget.expenditure.category == CategoryDescriptor.error() ? 'Category' : ''} ${widget.expenditure.value == 0.0 ? 'Amount' : ''} ${selectedDate == null ? 'Date' : ''}'))); //TODO localization
+                } else {
+                  //added = await DatabaseHandler().updateData(widget.expenditure);
+                  context.read<ExpenseBloc>().add(
+                      AddExpense(expense: widget.expenditure));
+                  Navigator.of(context).pop();
                 }
               },
               child: const Icon(Icons.save)),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
-        ));
+        ),
+));
   }
 
   refresh() async {

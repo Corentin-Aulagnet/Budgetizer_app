@@ -99,10 +99,11 @@ class StatisticsState extends State<Statistics>
           future: _dataFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
+              return const Center(child:CircularProgressIndicator());
             } else if (snapshot.connectionState == ConnectionState.done &&
                 snapshot.hasData) {
               return TabBarView(controller: tabController, children: [
+                //Tab 1
                 BlocProvider(
                     create: (_) {
                       bool initialShowAllCategories = false;
@@ -117,7 +118,6 @@ class StatisticsState extends State<Statistics>
                           showAllCategories: initialShowAllCategories);
                     },
                     child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
                           PieTypeChips(),
                           Row(children: <Widget>[
@@ -127,8 +127,10 @@ class StatisticsState extends State<Statistics>
                             DateDropDownMenu(),
                             categoriesToDisplaySwitch(),
                           ]),
-                          Expanded(child: SelectedPie()),
+                          SelectedPie(),
+                          //Expanded(child: SelectedPie()),
                         ])),
+                //Tab 2
                 BlocProvider(
                   create: (_) => BarChartBloc(data: snapshot.data!),
                   child: SingleChildScrollView(

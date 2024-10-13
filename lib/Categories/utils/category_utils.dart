@@ -57,7 +57,9 @@ class CategoryDescriptor {
   String getName(BuildContext context) {
     return isError ? AppLocalizations.of(context)!.noCategoryName : name;
   }
-
+  String getEmoji(BuildContext context) {
+    return isError ? AppLocalizations.of(context)!.noCategoryName : emoji;
+  }
   bool isCluster() {
     //Is a cluster if has children or if no parent and no children
     return children.isNotEmpty || children.isEmpty && parent == null;

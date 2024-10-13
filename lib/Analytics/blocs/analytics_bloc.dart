@@ -1,9 +1,14 @@
+import 'dart:ffi';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:ledgerstats/Categories/utils/category_utils.dart';
 import 'package:ledgerstats/database_handler.dart';
 import 'package:ledgerstats/Expenses/utils/expenditure.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledgerstats/Analytics/utils/charts.dart' as charts;
 import 'package:ledgerstats/tuple.dart';
+import 'package:sqflite/utils/utils.dart';
 
 class MonthDisplay {
   static final Map<int, String> intToStrMonths = {
@@ -59,7 +64,13 @@ abstract class PieChartEvent {
   final int tabIndex;
   PieChartEvent({this.tabIndex = -1});
 }
+class PieChartDataTuple {
+  final Map<CategoryDescriptor, double> map;
+  final double totalValue;
 
+  // Constructor
+  PieChartDataTuple({required this.map, required this.totalValue});
+}
 class ChangePieChartType extends PieChartEvent {
   final charts.ChartsType chartType;
   ChangePieChartType({required this.chartType, int tabIndex = -1})
@@ -96,7 +107,7 @@ abstract class PieChartState {
   final int tabIndex;
   final bool showAllCategories;
   final Data data;
-  late final Map<CategoryDescriptor, double> groupedData;
+  late final PieChartDataTuple groupedData;
   PieChartState(
       {required this.groupedData,
       required this.data,
@@ -112,13 +123,13 @@ abstract class PieChartState {
       required this.year,
       required this.showAllCategories,
       this.tabIndex = -1}) {
-    groupedData = bloc.getCatagorizedDataByMonth();
+    groupedData = bloc.getCategorizedDataByMonth();
   }
 }
 
 class PieChartChanged extends PieChartState {
   PieChartChanged(
-      {required Map<CategoryDescriptor, double> groupedData,
+      {required PieChartDataTuple groupedData,
       required Data data,
       required charts.ChartsType chartType,
       required String month,
@@ -157,7 +168,7 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
       required this.showAllCategories})
       : super(
           PieChartChanged(
-              groupedData: getCatagorizedDataByMonth_static(
+              groupedData: getCategorizedDataByMonth_static(
                   data.expenses, year, month, showAllCategories),
               tabIndex: 0,
               data: data,
@@ -185,7 +196,7 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
       required this.year,
       required this.showAllCategories})
       : super(PieChartChanged(
-            groupedData: getCatagorizedDataByMonth_static(
+            groupedData: getCategorizedDataByMonth_static(
                 data.expenses, year, month, showAllCategories),
             data: data,
             showAllCategories: showAllCategories,
@@ -197,16 +208,16 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
     month = event.month;
     year = event.year;
     previousState = state;
-    Map<CategoryDescriptor, double> groupedData;
+    PieChartDataTuple groupedData;
     switch (chartType) {
       case charts.ChartsType.monthlyPie:
-        groupedData = getCatagorizedDataByMonth();
+        groupedData = getCategorizedDataByMonth();
         break;
       case charts.ChartsType.yearlyPie:
         groupedData = getCategorizedDataByYear();
         break;
       default:
-        groupedData = getCatagorizedDataByMonth();
+        groupedData = getCategorizedDataByMonth();
     }
     emit(PieChartChanged(
         groupedData: groupedData,
@@ -221,16 +232,16 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
   void onTypeChanged(ChangePieChartType event, Emitter<PieChartState> emit) {
     chartType = event.chartType;
     previousState = state;
-    Map<CategoryDescriptor, double> groupedData;
+    PieChartDataTuple groupedData;
     switch (chartType) {
       case charts.ChartsType.monthlyPie:
-        groupedData = getCatagorizedDataByMonth();
+        groupedData = getCategorizedDataByMonth();
         break;
       case charts.ChartsType.yearlyPie:
         groupedData = getCategorizedDataByYear();
         break;
       default:
-        groupedData = getCatagorizedDataByMonth();
+        groupedData = getCategorizedDataByMonth();
     }
     emit(PieChartChanged(
         groupedData: groupedData,
@@ -246,16 +257,16 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
       ChangePieChartCategoriesDisplayed event, Emitter<PieChartState> emit) {
     showAllCategories = event.showAllCategories;
     previousState = state;
-    Map<CategoryDescriptor, double> groupedData;
+    PieChartDataTuple groupedData;
     switch (chartType) {
       case charts.ChartsType.monthlyPie:
-        groupedData = getCatagorizedDataByMonth();
+        groupedData = getCategorizedDataByMonth();
         break;
       case charts.ChartsType.yearlyPie:
         groupedData = getCategorizedDataByYear();
         break;
       default:
-        groupedData = getCatagorizedDataByMonth();
+        groupedData = getCategorizedDataByMonth();
     }
     emit(PieChartChanged(
         groupedData: groupedData,
@@ -267,8 +278,9 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
         tabIndex: event.tabIndex));
   }
 
-  Map<CategoryDescriptor, double> getCategorizedDataByYear() {
+  PieChartDataTuple getCategorizedDataByYear() {
     List<Expenditure> results = data.expenses;
+
     List<Expenditure> dataToPlot = List.empty(growable: true);
     Set<CategoryDescriptor> categoriesToPlot = {};
     Map<CategoryDescriptor, double> dataToPlotGroupedBycategories = {};
@@ -289,7 +301,7 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
             value: exp.value,
             date: date,
             dataBaseId: exp.dataBaseId));
-      }
+      }}
       //Aggregate by categories
       for (CategoryDescriptor cat in categoriesToPlot) {
         dataToPlotGroupedBycategories[cat] = 0;
@@ -304,25 +316,26 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
         );
       }
       //Normalize and converts to %
+
       for (var element in dataToPlotGroupedBycategories.keys) {
         double tmpValue = dataToPlotGroupedBycategories[element]!;
         tmpValue /= totalValueDisplayed;
         tmpValue *= 100;
         dataToPlotGroupedBycategories[element] = tmpValue;
       }
-    }
-    return dataToPlotGroupedBycategories;
+
+    return PieChartDataTuple(map:dataToPlotGroupedBycategories,totalValue:totalValueDisplayed);
   }
 
-  Map<CategoryDescriptor, double> getCatagorizedDataByMonth() {
+  PieChartDataTuple getCategorizedDataByMonth() {
     List<Expenditure> results = data.expenses;
     String year = this.year;
     String month = this.month;
-    return getCatagorizedDataByMonth_static(
+    return getCategorizedDataByMonth_static(
         results, year, month, showAllCategories);
   }
 
-  static Map<CategoryDescriptor, double> getCatagorizedDataByMonth_static(
+  static PieChartDataTuple getCategorizedDataByMonth_static(
       List<Expenditure> results,
       String year,
       String month,
@@ -336,21 +349,33 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
     for (Expenditure exp in results) {
       DateTime date = exp.date;
       bool categoryIsARoot = exp.category.parent == null;
-      if (date.month == mmyy.month &&
-          date.year == mmyy.year &&
-          (showAllCategories || categoryIsARoot)) {
-        categoriesToPlot.add(exp.category);
-        dataToPlot.add(exp);
-      } else if (date.month == mmyy.month &&
-          date.year == mmyy.year &&
-          !(showAllCategories || categoryIsARoot)) {
-        dataToPlot.add(Expenditure(
-            title: exp.title,
-            category: exp.category.parent!,
-            value: exp.value,
-            date: date,
-            dataBaseId: exp.dataBaseId));
+      //Test if category date is in time range
+      if( date.month == mmyy.month && date.year == mmyy.year){
+        //If showAllCategories then adds all categories to display
+        if(showAllCategories){
+          categoriesToPlot.add(exp.category);
+          dataToPlot.add(exp);
+        }
+        else {
+          //showAllCategories is False so we discriminate expenses based on whether the category is a root or not
+          if(categoryIsARoot){
+            //Else, if the category is a root, then adds it to display
+            categoriesToPlot.add(exp.category);
+            dataToPlot.add(exp);
+          }else{
+            //Category has a parent, we shall add the expense to the parent category
+            //And add the parent category to the plot set if not already present
+            categoriesToPlot.add(exp.category.parent!);
+            dataToPlot.add(Expenditure(
+                title: exp.title,
+                category: exp.category.parent!,
+                value: exp.value,
+                date: date,
+                dataBaseId: exp.dataBaseId));
+          }
+        }
       }
+
     }
     //Aggregate by categories
     for (var element in categoriesToPlot) {
@@ -362,18 +387,48 @@ class PieChartBloc extends Bloc<PieChartEvent, PieChartState> {
       dataToPlotGroupedBycategories.update(
         element.category,
         (value) => element.value + value,
-        ifAbsent: () => element.value,
+        ifAbsent: () {return element.value;},
       );
     }
-    //Normalize and converts to %
-    for (var element in dataToPlotGroupedBycategories.keys) {
-      double tmpValue = dataToPlotGroupedBycategories[element]!;
+
+    //WIP to sort categories
+    CategoryDescriptor other = CategoryDescriptor(name: "Other", emoji: "\u2754", descriptors: [], id: 0);
+    bool concatenateToOther = false;
+    if(categoriesToPlot.length > 9){
+      concatenateToOther = true;
+
+    }
+    List<CategoryDescriptor> sortedCategories = List.empty(growable: true);
+    //Sort and aggregate to other if necessary
+    List<MapEntry<CategoryDescriptor,double>> sortedData = List.from(dataToPlotGroupedBycategories.entries);
+    //Sort in reverse order
+    mergeSort(sortedData,compare: (MapEntry<CategoryDescriptor,double> a ,MapEntry<CategoryDescriptor,double>b){return a.value > b.value ? -1 : (a.value < b.value ? 1 : 0);});
+    Map<CategoryDescriptor, double> finalData = {};
+    if(concatenateToOther){
+      finalData[other] = 0;
+      for(MapEntry<CategoryDescriptor,double> entry in sortedData){
+        if(finalData.length <= 9){
+          finalData[entry.key] = entry.value;
+        }
+        else{
+          finalData[other] = finalData[other]!+entry.value;
+        }
+
+      }
+    }
+    else{
+    finalData = dataToPlotGroupedBycategories;
+    }
+    //Normalize and converts to % for display on a pie chart
+    for (var element in finalData.keys) {
+      double tmpValue = finalData[element]!;
       tmpValue /= totalValueDisplayed;
       tmpValue *= 100;
-      dataToPlotGroupedBycategories[element] = tmpValue;
+      finalData[element] = tmpValue;
     }
-    return dataToPlotGroupedBycategories;
+    return PieChartDataTuple(map:finalData,totalValue: totalValueDisplayed);
   }
+
 }
 
 //BarCharts
@@ -492,17 +547,47 @@ class BarChartBloc extends Bloc<BarChartEvent, BarChartState> {
             dataBaseId: element.dataBaseId));
       }
     }
+    //WIP to sort categories
+    CategoryDescriptor other = CategoryDescriptor(name: "Other", emoji: "\u2754", descriptors: [], id: 0);
+    bool concatenateToOther = false;
+    if(categoriesToPlot.length > 10){
+      concatenateToOther = true;    
+
+      }
+  List<CategoryDescriptor> sortedCategories = List.empty(growable: true);
+    //WIP
+    for (Expenditure element in dataToPlot) {
+        mergeSort(dataToPlot,compare: (Expenditure a ,Expenditure b ) {return a > b ? 1 : (a < b ? -1 : 0);});
+      }
+
     //Aggregate by categories
     for (CategoryDescriptor element in categoriesToPlot) {
       dataToPlotGroupedBycategories[element] = 0;
     }
-    for (int i = 0; i < dataToPlot.length; i++) {
+    for (int i = 0; i < min(dataToPlot.length,10); i++) {
       Expenditure element = dataToPlot[i];
       dataToPlotGroupedBycategories.update(
         element.category,
         (value) => element.value + value,
         ifAbsent: () => element.value,
       );
+      //Sort and aggregate to other if necessary
+      List<MapEntry<CategoryDescriptor,double>> sortedData = List.from(dataToPlotGroupedBycategories.entries);
+      mergeSort(sortedData,compare: (MapEntry<CategoryDescriptor,double> a ,MapEntry<CategoryDescriptor,double>b){return a.value > b.value ? 1 : (a.value < b.value ? -1 : 0);});
+      Map<CategoryDescriptor, double> finalData = {};
+      if(concatenateToOther){
+        finalData[other] = 0;
+        for(MapEntry<CategoryDescriptor,double> entry in sortedData){
+          if(finalData.length < 9){
+            finalData[entry.key] = entry.value;
+          }
+          else{
+            finalData[other] = finalData[other]!+entry.value;
+          }
+
+        }
+      }
+
     }
     return dataToPlotGroupedBycategories;
   }

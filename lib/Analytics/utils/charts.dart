@@ -262,18 +262,18 @@ class YearlyPieState extends State<YearlyPie> {
   }
 
   List<Widget> showingIndicators(PieChartState state) {
-    Map<CategoryDescriptor, double> data = state.groupedData;
+    PieChartDataTuple data = state.groupedData;
     print(data);
-    return List.generate(data.length, (index) {
+    return List.generate(data.map.length, (index) {
       return Column(children: <Widget>[
         Row(
           children: [
             Indicator(
               color: AppColors.palette3[index],
-              text: data.keys.elementAt(index).getName(context),
+              text: data.map.keys.elementAt(index).getName(context),
               isSquare: true,
             ),
-            Text(data.keys.elementAt(index).emoji)
+            Text(data.map.keys.elementAt(index).emoji)
           ],
         ),
         const SizedBox(
@@ -284,15 +284,15 @@ class YearlyPieState extends State<YearlyPie> {
   }
 
   List<PieChartSectionData> showingSections(PieChartState state) {
-    Map<CategoryDescriptor, double> data = state.groupedData;
-    return List.generate(data.length, (i) {
+    PieChartDataTuple data = state.groupedData;
+    return List.generate(data.map.length, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 16.0 : 10.0;
       final radius = isTouched ? 60.0 : 50.0;
       return PieChartSectionData(
           color: AppColors.palette3[i],
-          value: data.values.elementAt(i),
-          title: data.keys.elementAt(i).getName(context),
+          value: data.map.values.elementAt(i),
+          title: data.map.keys.elementAt(i).getName(context),
           radius: radius,
           titleStyle: TextStyle(
             fontSize: fontSize,
@@ -307,7 +307,7 @@ class YearlyPieState extends State<YearlyPie> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '${(data.values.elementAt(i) * totalValueDisplayed / 100).toStringAsFixed(2)}€',
+                    '${(data.map.values.elementAt(i) * totalValueDisplayed / 100).toStringAsFixed(2)}€',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[800],
@@ -320,13 +320,13 @@ class YearlyPieState extends State<YearlyPie> {
   }
 
   List<Widget> showingListTiles(PieChartState state) {
-    Map<CategoryDescriptor, double> data = state.groupedData;
-    return List.generate(data.length, (index) {
+    PieChartDataTuple data = state.groupedData;
+    return List.generate(data.map.length, (index) {
       return ListTile(
-          leading: Text(data.keys.elementAt(index).emoji),
-          title: Text(data.keys.elementAt(index).getName(context)),
-          trailing: Text(
-              '${(data.values.elementAt(index) * totalValueDisplayed / 100).toStringAsFixed(2)}€'));
+          leading: Text(data.map.keys.elementAt(index).emoji),
+          title: Text(data.map.keys.elementAt(index).getName(context)),
+          trailing:
+              Text('${(data.map.values.elementAt(index)).toStringAsFixed(2)}€'));
     });
   }
 }
@@ -340,103 +340,94 @@ class MonthlyPieState extends State<MonthlyPie> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PieChartBloc, PieChartState>(builder: (_, chartState) {
-      type = chartState.chartType;
-      displayAllCategories = chartState.showAllCategories;
-      List<Expenditure> dataToDisplay = chartState.data.expenses
-          .where((element) => element.date.isAfter(DateTime(
-              int.parse(chartState.year), int.parse(chartState.month))))
-          .toList();
-      bool isThereData = dataToDisplay.isNotEmpty;
-      if (isThereData) {
-        totalValueDisplayed = 0.0;
-        for (Expenditure exp in dataToDisplay) {
-          totalValueDisplayed = totalValueDisplayed + exp.value;
-        }
-        return Card(
-            color: Colors.white,
-            child: Flex(
-              direction: widget.alignment,
-              children: [
-                Expanded(
-                  child: AspectRatio(
-                    aspectRatio: widget.aspectRatio,
-                    child: PieChart(
-                      PieChartData(
-                        pieTouchData: PieTouchData(
-                          touchCallback:
-                              (FlTouchEvent event, pieTouchResponse) {
-                            setState(() {
-                              if (!event.isInterestedForInteractions ||
-                                  pieTouchResponse == null ||
-                                  pieTouchResponse.touchedSection == null) {
-                                touchedIndex = -1;
-                                return;
-                              }
-                              touchedIndex = pieTouchResponse
-                                  .touchedSection!.touchedSectionIndex;
-                            });
-                          },
-                        ),
-                        borderData: FlBorderData(
-                          show: false,
-                        ),
-                        sectionsSpace: 0,
-                        centerSpaceRadius: 80,
-                        sections: showingSections(chartState),
-                      ),
-                    ),
+    type = BlocProvider.of<PieChartBloc>(context).chartType;
+    displayAllCategories =
+        BlocProvider.of<PieChartBloc>(context).showAllCategories;
+    PieChartDataTuple data = BlocProvider.of<PieChartBloc>(context)
+        .getCategorizedDataByMonth();
+    bool isThereData = data.map.isNotEmpty;
+    if (isThereData) {
+      return Column(
+        children: [
+          Text("Total value ${data.totalValue.toStringAsFixed(2)}€"),
+          AspectRatio(
+              aspectRatio: widget.aspectRatio,
+              child: PieChart(
+                PieChartData(
+                  pieTouchData: PieTouchData(
+                    touchCallback: (FlTouchEvent event, pieTouchResponse) {
+                      setState(() {
+                        if (!event.isInterestedForInteractions ||
+                            pieTouchResponse == null ||
+                            pieTouchResponse.touchedSection == null) {
+                          touchedIndex = -1;
+                          return;
+                        }
+                        touchedIndex = pieTouchResponse
+                            .touchedSection!.touchedSectionIndex;
+                      });
+                    },
                   ),
+                  borderData: FlBorderData(
+                    show: false,
+                  ),
+                  sectionsSpace: 0,
+                  centerSpaceRadius: 80,
+                  sections: showingSections(
+                      data),
                 ),
-                Wrap(
-                  direction: flipAxis(widget.alignment),
-                  spacing: 8.0, // Adjust as needed
-                  runSpacing: 8.0, // Adjust as needed
-                  //crossAxisAlignment: CrossAxisAlignment.start,
-                  children: showingIndicators(chartState),
-                )
-              ],
-            ));
-      } else {
-        return const Card(
-            color: Colors.white,
-            child: Text(
-                "Oups no data to display right now")); //TODO Localization //TODO add a cartoon image
-      }
-    });
+              )),
+          SizedBox(
+              height: 16 * 5,
+              width: double.infinity,
+              child: SingleChildScrollView(
+                  child: showingIndicators(
+                      data)))
+        ],
+      );
+    } else {
+      return const Card(
+          color: Colors.white,
+          child: Text(
+              "Oups no data to display right now")); //TODO Localization //TODO add a cartoon image
+    }
   }
 
-  List<Widget> showingIndicators(PieChartState state) {
-    Map<CategoryDescriptor, double> data = state.groupedData;
-    return List.generate(data.length, (index) {
-      return Column(children: <Widget>[
-        Row(
-          children: [
-            Indicator(
-              color: AppColors.palette3[index],
-              text: data.keys.elementAt(index).getName(context),
-              isSquare: true,
-            ),
-            Text(data.keys.elementAt(index).emoji)
-          ],
-        ),
-        const SizedBox(
-          height: 4,
-        )
-      ]);
-    });
+  Widget showingIndicators(PieChartDataTuple data) {
+    return /*ListView.builder(
+        scrollDirection: Axis.vertical,
+        //shrinkWrap: true,
+        itemCount: data.length,
+        itemBuilder: (context, index) {
+          return Row(children:[Indicator(
+            color: AppColors.palette3[index],
+            text: '${data.keys.elementAt(index).emoji} ${data.keys.elementAt(index).getName(context)}',
+            isSquare: true,
+          )])
+          ;
+
+        });*/
+        Column(
+            children: List.generate(data.map.length, (index) {
+      return Indicator(
+        color: AppColors.palette3[index],
+        text:
+            '${data.map.keys.elementAt(index).emoji} ${data.map.keys.elementAt(index).getName(context)}',
+        isSquare: true,
+      );
+    }));
   }
 
-  List<PieChartSectionData> showingSections(PieChartState state) {
-    Map<CategoryDescriptor, double> data = state.groupedData;
-    return List.generate(data.length, (i) {
+  List<PieChartSectionData> showingSections(
+      PieChartDataTuple data) {
+    return List.generate(data.map.length, (i) {
       final isTouched = i == touchedIndex;
       final fontSize = isTouched ? 16.0 : 10.0;
       final radius = isTouched ? 60.0 : 50.0;
       return PieChartSectionData(
           color: AppColors.palette3[i],
-          value: data.values.elementAt(i),
-          title: data.keys.elementAt(i).getName(context),
+          value: data.map.values.elementAt(i),
+          title: data.map.keys.elementAt(i).getEmoji(context),
           radius: radius,
           titleStyle: TextStyle(
             fontSize: fontSize,
@@ -451,7 +442,7 @@ class MonthlyPieState extends State<MonthlyPie> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    '${(data.values.elementAt(i) * totalValueDisplayed / 100).toStringAsFixed(2)}€',
+                    '${(data.map.values.elementAt(i) * data.totalValue / 100).toStringAsFixed(2)}€',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[800],
@@ -464,13 +455,13 @@ class MonthlyPieState extends State<MonthlyPie> {
   }
 
   List<Widget> showingListTiles(PieChartState state) {
-    Map<CategoryDescriptor, double> data = state.groupedData;
-    return List.generate(data.length, (index) {
+    PieChartDataTuple data = state.groupedData;
+    return List.generate(data.map.length, (index) {
       return ListTile(
-          leading: Text(data.keys.elementAt(index).emoji),
-          title: Text(data.keys.elementAt(index).getName(context)),
+          leading: Text(data.map.keys.elementAt(index).emoji),
+          title: Text(data.map.keys.elementAt(index).getName(context)),
           trailing: Text(
-              '${(data.values.elementAt(index) * totalValueDisplayed / 100).toStringAsFixed(2)}€'));
+              '${(data.map.values.elementAt(index) * totalValueDisplayed / 100).toStringAsFixed(2)}€'));
     });
   }
 }
